@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mã Playfair</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1e1e2d;
+            color: #e0e0e0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #3699ff;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .description {
+            background: #2b2b40;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .features {
+            margin: 20px 0;
+        }
+        .features li {
+            margin: 10px 0;
+            color: #e0e0e0;
+        }
+        .matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 5px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #2b2b40;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: #1e1e2d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 4px;
+            color: #3699ff;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #2b2b40;
+            border: 1px solid #3f3f5f;
+            color: #e0e0e0;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 24px;
+            background: #3699ff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1e88ff;
+        }
+        .rule-button {
+            background: #2b2b40;
+            border: 1px solid #3699ff;
+        }
+        .rule-button:hover {
+            background: #3f3f5f;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #2b2b40;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .steps {
+            margin-top: 20px;
+            padding: 20px;
+            background: #2b2b40;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            color: #e0e0e0;
+        }
+        .example {
+            background: #2b2b40;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mã Playfair</h1>
+        
+        <div class="description">
+            <p><strong>Nguyên lý:</strong> Mã hóa từng cặp ký tự sử dụng ma trận 5x5.</p>
+            
+            <div class="features">
+                <strong>Đặc điểm:</strong>
+                <ul>
+                    <li>Thay thế I/J bằng một ký tự</li>
+                    <li>Thêm 'X' giữa các ký tự giống nhau</li>
+                    <li>Hoán đổi theo quy tắc hình chữ nhật</li>
+                </ul>
+            </div>
+            
+            <p><strong>Ưu điểm:</strong> Khó phá vỡ hơn các mã thay thế đơn</p>
+        </div>
+
+        <input type="text" id="text" placeholder="Nhập văn bản (VD: HELLO)">
+        <input type="text" id="key" placeholder="Nhập khóa (VD: MONARCHY)">
+        
+        <div class="button-group">
+            <button onclick="encrypt()">Mã hóa</button>
+            <button onclick="decrypt()">Giải mã</button>
+            <button class="rule-button" onclick="showRule('row')">Quy tắc hàng</button>
+            <button class="rule-button" onclick="showRule('col')">Quy tắc cột</button>
+        </div>
+
+        <div id="matrix" class="matrix"></div>
+        <div id="result" class="result"></div>
+        <div id="steps" class="steps"></div>
+
+        <div class="example">
+            <strong>Ví dụ:</strong>
+            <p>Khóa: CIPHER</p>
+            <p>Ma trận: C I P H E R A B D F G K L M N O Q S T U V W X Y Z</p>
+            <p>Bản rõ: HELLO</p>
+            <p>Cặp ký tự: HE LX LO</p>
+            <p>Mã hóa: DM KM TW</p>
+        </div>
+    </div>
+
+    <script>
+        // Tạo ma trận Playfair từ khóa
+        function createMatrix(key) {
+            // Khởi tạo ma trận trống 5x5
+            let matrix = [];
+            for(let i = 0; i < 5; i++) {
+                matrix[i] = new Array(5).fill('');
+            }
+
+            // Xử lý khóa: chuyển về chữ hoa, bỏ khoảng trắng và ký tự đặc biệt
+            key = key.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            // Tạo bảng chữ cái (thay J bằng I)
+            let alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+            
+            // Kết hợp khóa và bảng chữ cái, loại bỏ ký tự trùng lặp
+            let matrixChars = '';
+            for(let char of key) {
+                if(char === 'J') char = 'I';
+                if(!matrixChars.includes(char)) {
+                    matrixChars += char;
+                }
+            }
+            for(let char of alphabet) {
+                if(!matrixChars.includes(char)) {
+                    matrixChars += char;
+                }
+            }
+
+            // Điền ký tự vào ma trận
+            let index = 0;
+            for(let i = 0; i < 5; i++) {
+                for(let j = 0; j < 5; j++) {
+                    matrix[i][j] = matrixChars[index++];
+                }
+            }
+
+            return matrix;
+        }
+
+        // Tìm vị trí của ký tự trong ma trận
+        function findPosition(matrix, char) {
+            if(char === 'J') char = 'I';
+            for(let i = 0; i < 5; i++) {
+                for(let j = 0; j < 5; j++) {
+                    if(matrix[i][j] === char) {
+                        return [i, j];
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Chuẩn bị văn bản để mã hóa
+        function prepareText(text) {
+            // Chuyển về chữ hoa, bỏ khoảng trắng và ký tự đặc biệt
+            text = text.toUpperCase().replace(/[^A-Z]/g, '');
+            
+            // Thay J bằng I
+            text = text.replace(/J/g, 'I');
+            
+            // Tách thành các cặp, thêm X nếu cần
+            let pairs = [];
+            for(let i = 0; i < text.length; i += 2) {
+                let pair = text[i];
+                
+                // Nếu còn ký tự tiếp theo
+                if(i + 1 < text.length) {
+                    // Nếu hai ký tự giống nhau, thêm X vào giữa
+                    if(text[i] === text[i + 1]) {
+                        pair += 'X';
+                        i--;
+                    } else {
+                        pair += text[i + 1];
+                    }
+                } else {
+                    // Nếu còn một ký tự cuối, thêm X
+                    pair += 'X';
+                }
+                pairs.push(pair);
+            }
+            
+            return pairs;
+        }
+
+        // Hiển thị ma trận
+        function displayMatrix(matrix) {
+            const matrixDiv = document.getElementById('matrix');
+            matrixDiv.innerHTML = '';
+            
+            for(let i = 0; i < 5; i++) {
+                for(let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = matrix[i][j];
+                    matrixDiv.appendChild(cell);
+                }
+            }
+        }
+
+        // Mã hóa
+        function encrypt() {
+            const text = document.getElementById('text').value;
+            const key = document.getElementById('key').value;
+            
+            if(!text || !key) {
+                alert('Vui lòng nhập cả văn bản và khóa');
+                return;
+            }
+
+            const matrix = createMatrix(key);
+            displayMatrix(matrix);
+            
+            const pairs = prepareText(text);
+            let result = '';
+            let steps = 'Các bước mã hóa:\n\n';
+            
+            for(let pair of pairs) {
+                const [row1, col1] = findPosition(matrix, pair[0]);
+                const [row2, col2] = findPosition(matrix, pair[1]);
+                
+                let newPair = '';
+                
+                if(row1 === row2) {
+                    // Cùng hàng - lấy ký tự bên phải
+                    newPair = matrix[row1][(col1 + 1) % 5] + matrix[row2][(col2 + 1) % 5];
+                    steps += `${pair} → Cùng hàng ${row1 + 1} → ${newPair}\n`;
+                }
+                else if(col1 === col2) {
+                    // Cùng cột - lấy ký tự bên dưới
+                    newPair = matrix[(row1 + 1) % 5][col1] + matrix[(row2 + 1) % 5][col2];
+                    steps += `${pair} → Cùng cột ${col1 + 1} → ${newPair}\n`;
+                }
+                else {
+                    // Hình chữ nhật - lấy ký tự ở góc còn lại
+                    newPair = matrix[row1][col2] + matrix[row2][col1];
+                    steps += `${pair} → Hình chữ nhật → ${newPair}\n`;
+                }
+                
+                result += newPair;
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <p><strong>Văn bản gốc:</strong> ${text}</p>
+                <p><strong>Các cặp ký tự:</strong> ${pairs.join(' ')}</p>
+                <p><strong>Kết quả mã hóa:</strong> ${result}</p>
+            `;
+            document.getElementById('steps').textContent = steps;
+        }
+
+        // Giải mã
+        function decrypt() {
+            const text = document.getElementById('text').value;
+            const key = document.getElementById('key').value;
+            
+            if(!text || !key) {
+                alert('Vui lòng nhập cả văn bản và khóa');
+                return;
+            }
+
+            const matrix = createMatrix(key);
+            displayMatrix(matrix);
+            
+            // Tách văn bản thành các cặp
+            const pairs = [];
+            for(let i = 0; i < text.length; i += 2) {
+                pairs.push(text.substr(i, 2));
+            }
+            
+            let result = '';
+            let steps = 'Các bước giải mã:\n\n';
+            
+            for(let pair of pairs) {
+                const [row1, col1] = findPosition(matrix, pair[0]);
+                const [row2, col2] = findPosition(matrix, pair[1]);
+                
+                let newPair = '';
+                
+                if(row1 === row2) {
+                    // Cùng hàng - lấy ký tự bên trái
+                    newPair = matrix[row1][(col1 + 4) % 5] + matrix[row2][(col2 + 4) % 5];
+                    steps += `${pair} → Cùng hàng ${row1 + 1} → ${newPair}\n`;
+                }
+                else if(col1 === col2) {
+                    // Cùng cột - lấy ký tự bên trên
+                    newPair = matrix[(row1 + 4) % 5][col1] + matrix[(row2 + 4) % 5][col2];
+                    steps += `${pair} → Cùng cột ${col1 + 1} → ${newPair}\n`;
+                }
+                else {
+                    // Hình chữ nhật - lấy ký tự ở góc còn lại
+                    newPair = matrix[row1][col2] + matrix[row2][col1];
+                    steps += `${pair} → Hình chữ nhật → ${newPair}\n`;
+                }
+                
+                result += newPair;
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <p><strong>Văn bản mã hóa:</strong> ${text}</p>
+                <p><strong>Các cặp ký tự:</strong> ${pairs.join(' ')}</p>
+                <p><strong>Kết quả giải mã:</strong> ${result}</p>
+            `;
+            document.getElementById('steps').textContent = steps;
+        }
+
+        // Thêm hàm mới để hiển thị quy tắc
+        function showRule(type) {
+            const stepsDiv = document.getElementById('steps');
+            if (type === 'row') {
+                stepsDiv.textContent = 'Quy tắc hàng:\n' +
+                    '- Nếu hai ký tự nằm trên cùng một hàng\n' +
+                    '- Lấy ký tự bên phải của mỗi ký tự\n' +
+                    '- Nếu ở cuối hàng, quay lại đầu hàng';
+            } else {
+                stepsDiv.textContent = 'Quy tắc cột:\n' +
+                    '- Nếu hai ký tự nằm trên cùng một cột\n' +
+                    '- Lấy ký tự bên dưới của mỗi ký tự\n' +
+                    '- Nếu ở cuối cột, quay lại đầu cột';
+            }
+        }
+
+        // Khởi tạo
+        window.onload = function() {
+            const matrix = createMatrix('MONARCHY');
+            displayMatrix(matrix);
+        };
+    </script>
+</body>
+</html> 

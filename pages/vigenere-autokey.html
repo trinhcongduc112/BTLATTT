@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigenère Autokey - Cryptography</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/main.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">Cryptography</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="text-info mb-4">Vigenère Autokey Cipher</h1>
+        <p class="lead mb-4">
+            The Vigenère Autokey cipher is a polyalphabetic substitution cipher that uses the plaintext itself 
+            as part of the key. After using the initial key, the cipher uses the plaintext as the continuing key,
+            making it more secure than the standard Vigenère cipher.
+        </p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card bg-dark-subtle p-4">
+                    <h3 class="mb-3">Encryption</h3>
+                    <div class="mb-3">
+                        <label for="encrypt-text" class="form-label">Text to Encrypt</label>
+                        <textarea class="form-control" id="encrypt-text" rows="3" placeholder="Enter text to encrypt..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="encrypt-key" class="form-label">Initial Key</label>
+                        <input type="text" class="form-control" id="encrypt-key" placeholder="Enter initial key...">
+                    </div>
+                    <button class="btn btn-primary" onclick="encrypt()">Encrypt</button>
+                    <div id="encrypt-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Encrypted Text:</h4>
+                        <p class="mb-0" id="encrypt-output"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card bg-dark-subtle p-4">
+                    <h3 class="mb-3">Decryption</h3>
+                    <div class="mb-3">
+                        <label for="decrypt-text" class="form-label">Text to Decrypt</label>
+                        <textarea class="form-control" id="decrypt-text" rows="3" placeholder="Enter text to decrypt..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="decrypt-key" class="form-label">Initial Key</label>
+                        <input type="text" class="form-control" id="decrypt-key" placeholder="Enter initial key...">
+                    </div>
+                    <button class="btn btn-primary" onclick="decrypt()">Decrypt</button>
+                    <div id="decrypt-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Decrypted Text:</h4>
+                        <p class="mb-0" id="decrypt-output"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function encrypt() {
+            const text = document.getElementById('encrypt-text').value;
+            const key = document.getElementById('encrypt-key').value;
+            
+            try {
+                const response = await fetch('http://localhost:3000/vigenere-autokey/encrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, key })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                document.getElementById('encrypt-output').textContent = data.ciphertext;
+                document.getElementById('encrypt-result').style.display = 'block';
+            } catch (error) {
+                alert('Error connecting to server');
+            }
+        }
+
+        async function decrypt() {
+            const text = document.getElementById('decrypt-text').value;
+            const key = document.getElementById('decrypt-key').value;
+            
+            try {
+                const response = await fetch('http://localhost:3000/vigenere-autokey/decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, key })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                document.getElementById('decrypt-output').textContent = data.plaintext;
+                document.getElementById('decrypt-result').style.display = 'block';
+            } catch (error) {
+                alert('Error connecting to server');
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playfair Cipher - Cryptography</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/main.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">Cryptography</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="text-info mb-4">Playfair Cipher</h1>
+        <p class="lead mb-4">
+            The Playfair cipher is a digraph substitution cipher that encrypts pairs of letters. 
+            It uses a 5x5 grid of letters constructed using a keyword, where I and J share the same position.
+            This cipher was the first practical digraph substitution cipher.
+        </p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card bg-dark-subtle p-4">
+                    <h3 class="mb-3">Encryption</h3>
+                    <div class="mb-3">
+                        <label for="encrypt-text" class="form-label">Text to Encrypt</label>
+                        <textarea class="form-control" id="encrypt-text" rows="3" placeholder="Enter text to encrypt..."></textarea>
+                        <small class="form-text text-muted">Note: J will be treated as I</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="encrypt-key" class="form-label">Keyword</label>
+                        <input type="text" class="form-control" id="encrypt-key" placeholder="Enter keyword...">
+                    </div>
+                    <button class="btn btn-primary" onclick="encrypt()">Encrypt</button>
+                    <div id="encrypt-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Encrypted Text:</h4>
+                        <p class="mb-0" id="encrypt-output"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card bg-dark-subtle p-4">
+                    <h3 class="mb-3">Decryption</h3>
+                    <div class="mb-3">
+                        <label for="decrypt-text" class="form-label">Text to Decrypt</label>
+                        <textarea class="form-control" id="decrypt-text" rows="3" placeholder="Enter text to decrypt..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="decrypt-key" class="form-label">Keyword</label>
+                        <input type="text" class="form-control" id="decrypt-key" placeholder="Enter keyword...">
+                    </div>
+                    <button class="btn btn-primary" onclick="decrypt()">Decrypt</button>
+                    <div id="decrypt-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Decrypted Text:</h4>
+                        <p class="mb-0" id="decrypt-output"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-dark-subtle p-4">
+                    <h3 class="mb-3">Playfair Matrix</h3>
+                    <div id="matrix" class="text-monospace" style="font-family: monospace; font-size: 1.2em;">
+                        <!-- Matrix will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function encrypt() {
+            const text = document.getElementById('encrypt-text').value;
+            const key = document.getElementById('encrypt-key').value;
+            
+            try {
+                const response = await fetch('http://localhost:3000/playfair/encrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, key })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                document.getElementById('encrypt-output').textContent = data.ciphertext;
+                document.getElementById('encrypt-result').style.display = 'block';
+                if (data.matrix) {
+                    displayMatrix(data.matrix);
+                }
+            } catch (error) {
+                alert('Error connecting to server');
+            }
+        }
+
+        async function decrypt() {
+            const text = document.getElementById('decrypt-text').value;
+            const key = document.getElementById('decrypt-key').value;
+            
+            try {
+                const response = await fetch('http://localhost:3000/playfair/decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, key })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                document.getElementById('decrypt-output').textContent = data.plaintext;
+                document.getElementById('decrypt-result').style.display = 'block';
+                if (data.matrix) {
+                    displayMatrix(data.matrix);
+                }
+            } catch (error) {
+                alert('Error connecting to server');
+            }
+        }
+
+        function displayMatrix(matrix) {
+            const matrixDiv = document.getElementById('matrix');
+            let html = '<table class="table table-bordered table-dark table-sm w-auto"><tbody>';
+            for (let i = 0; i < 5; i++) {
+                html += '<tr>';
+                for (let j = 0; j < 5; j++) {
+                    html += `<td class="px-3 py-2 text-center">${matrix[i][j]}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            matrixDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html> 

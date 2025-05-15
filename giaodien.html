@@ -1,0 +1,697 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Demos</title>
+    <style>
+        :root {
+            --dark-bg: #232730;
+            --card-bg: #2d333d;
+            --card-hover: #35404f;
+            --accent-blue: #68b5e8;
+            --accent-orange: #ff7e50;
+            --text-light: #f0f2f5;
+            --text-secondary: #a7b3c7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .category {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+        
+        .category-title {
+            color: var(--accent-blue);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .cipher-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cipher-card:hover {
+            background-color: var(--card-hover);
+            transform: translateY(-3px);
+        }
+        
+        .cipher-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .cipher-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 2rem;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+        
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        button {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: #4292c7;
+        }
+        
+        .result-container {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            min-height: 100px;
+            word-break: break-all;
+        }
+        
+        .explanation {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            color: var(--text-secondary);
+        }
+        
+        .explanation h3 {
+            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+        }
+        
+        .security-warning {
+            background-color: rgba(255, 126, 80, 0.1);
+            border-left: 4px solid var(--accent-orange);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .security-warning p {
+            color: var(--accent-orange);
+            font-weight: bold;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                margin: 20px;
+                padding: 1.5rem;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                margin-bottom: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .category {
+                padding: 1rem;
+            }
+            
+            .modal-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cryptography Demos</h1>
+            <p class="subtitle">A collection of interactive demonstrations of various cryptography schemes.</p>
+        </header>
+        
+        <div class="security-warning">
+            <p>⚠️ Educational Purpose Only</p>
+            <span>These demonstrations are for educational purposes only and should not be used for securing sensitive information.</span>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="category">
+                <h2 class="category-title">Early Cryptography</h2>
+                
+                <div class="cipher-card" onclick="openModal('caesar')" role="button" aria-label="Open Caesar Cipher Demo">
+                    <h3 class="cipher-title">The Caesar Cipher</h3>
+                    <p class="cipher-desc">(Single Alphabet, Shifted)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('monoalphabetic')" role="button" aria-label="Open Monoalphabetic Cipher Demo">
+                    <h3 class="cipher-title">Monoalphabetic Cipher</h3>
+                    <p class="cipher-desc">(Simple Substitution)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('vigenere')" role="button" aria-label="Open Vigenère Cipher Demo">
+                    <h3 class="cipher-title">The Vigenère Cipher</h3>
+                    <p class="cipher-desc">(Polyalphabetic)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('vigenere-autokey')" role="button" aria-label="Open Vigenère Autokey Cipher Demo">
+                    <h3 class="cipher-title">Vigenère Autokey Cipher</h3>
+                    <p class="cipher-desc">(Autokey Polyalphabetic)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('playfair')" role="button" aria-label="Open Playfair Cipher Demo">
+                    <h3 class="cipher-title">Playfair Cipher</h3>
+                    <p class="cipher-desc">(Digram Substitution)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('transposition')" role="button" aria-label="Open Transposition Cipher Demo">
+                    <h3 class="cipher-title">Transposition Cipher</h3>
+                    <p class="cipher-desc">(Columnar Transposition)</p>
+                </div>
+            </div>
+            
+            <div class="category">
+                <h2 class="category-title">Modern Cryptography</h2>
+                
+                <div class="cipher-card" onclick="openModal('des')" role="button" aria-label="Open DES Cipher Demo">
+                    <h3 class="cipher-title">DES Cipher</h3>
+                    <p class="cipher-desc">(Data Encryption Standard)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('aes')" role="button" aria-label="Open AES Cipher Demo">
+                    <h3 class="cipher-title">AES Cipher</h3>
+                    <p class="cipher-desc">(Advanced Encryption Standard)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('symmetric')" role="button" aria-label="Open Symmetric Key Cryptography Demo">
+                    <h3 class="cipher-title">Symmetric Key Cryptography</h3>
+                    <p class="cipher-desc">(The Key Distribution Problem)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('rsa')" role="button" aria-label="Open RSA Cryptography Demo">
+                    <h3 class="cipher-title">RSA Cryptography</h3>
+                    <p class="cipher-desc">(Public-Key Encryption)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('elgamal')" role="button" aria-label="Open ElGamal Cryptography Demo">
+                    <h3 class="cipher-title">ElGamal Cryptography</h3>
+                    <p class="cipher-desc">(Asymmetric Encryption)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('dsa')" role="button" aria-label="Open DSA Signature Demo">
+                    <h3 class="cipher-title">DSA Signature</h3>
+                    <p class="cipher-desc">(Digital Signature Algorithm)</p>
+                </div>
+                
+                <div class="cipher-card" onclick="openModal('modulo')" role="button" aria-label="Open Modulo Operations Demo">
+                    <h3 class="cipher-title">Modulo Operations</h3>
+                    <p class="cipher-desc">(Mathematical Cryptography)</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Information Security Educational Resources</p>
+            <p>This website is for educational purposes only.</p>
+        </footer>
+    </div>
+    
+    <!-- Caesar Cipher Modal -->
+    <div id="caesar-modal" class="modal" aria-labelledby="caesar-modal-title" aria-hidden="true">
+        <div class="modal-content" role="dialog">
+            <button class="close-btn" onclick="closeModal('caesar')" aria-label="Close">×</button>
+            <h2 class="modal-title" id="caesar-modal-title">The Caesar Cipher</h2>
+            
+            <div class="tab-container">
+                <div class="tab-buttons" role="tablist">
+                    <button class="tab-btn active" onclick="changeTab('caesar', 'encrypt')" role="tab" aria-selected="true" aria-controls="caesar-encrypt">Encrypt</button>
+                    <button class="tab-btn" onclick="changeTab('caesar', 'decrypt')" role="tab" aria-selected="false" aria-controls="caesar-decrypt">Decrypt</button>
+                    <button class="tab-btn" onclick="changeTab('caesar', 'learn')" role="tab" aria-selected="false" aria-controls="caesar-learn">Learn More</button>
+                </div>
+                
+                <div id="caesar-encrypt" class="tab-content active" role="tabpanel">
+                    <div class="input-group">
+                        <label for="caesar-plaintext">Plain Text:</label>
+                        <textarea id="caesar-plaintext" rows="4" placeholder="Enter text to encrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="caesar-shift">Shift Value (1-25):</label>
+                        <input type="number" id="caesar-shift" min="1" max="25" value="3">
+                    </div>
+                    
+                    <button onclick="caesarEncrypt()">Encrypt</button>
+                    
+                    <div class="result-container" id="caesar-encrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="caesar-decrypt" class="tab-content" role="tabpanel">
+                    <div class="input-group">
+                        <label for="caesar-ciphertext">Cipher Text:</label>
+                        <textarea id="caesar-ciphertext" rows="4" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="caesar-decrypt-shift">Shift Value (1-25):</label>
+                        <input type="number" id="caesar-decrypt-shift" min="1" max="25" value="3">
+                    </div>
+                    
+                    <button onclick="caesarDecrypt()">Decrypt</button>
+                    
+                    <div class="result-container" id="caesar-decrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="caesar-learn" class="tab-content" role="tabpanel">
+                    <div class="explanation">
+                        <h3>What is the Caesar Cipher?</h3>
+                        <p>The Caesar Cipher is a simple substitution cipher where each letter is shifted by a fixed number of positions in the alphabet.</p>
+                        <h3>How it Works:</h3>
+                        <p>With a shift of 3, 'A' becomes 'D', 'B' becomes 'E', etc. It preserves the case and non-alphabetic characters.</p>
+                        <h3>Security Considerations:</h3>
+                        <p>Highly insecure due to its simplicity; can be broken with brute force or frequency analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monoalphabetic Cipher Modal -->
+    <div id="monoalphabetic-modal" class="modal" aria-labelledby="monoalphabetic-modal-title" aria-hidden="true">
+        <div class="modal-content" role="dialog">
+            <button class="close-btn" onclick="closeModal('monoalphabetic')" aria-label="Close">×</button>
+            <h2 class="modal-title" id="monoalphabetic-modal-title">Monoalphabetic Cipher</h2>
+            
+            <div class="tab-container">
+                <div class="tab-buttons" role="tablist">
+                    <button class="tab-btn active" onclick="changeTab('monoalphabetic', 'encrypt')" role="tab" aria-selected="true" aria-controls="monoalphabetic-encrypt">Encrypt</button>
+                    <button class="tab-btn" onclick="changeTab('monoalphabetic', 'decrypt')" role="tab" aria-selected="false" aria-controls="monoalphabetic-decrypt">Decrypt</button>
+                    <button class="tab-btn" onclick="changeTab('monoalphabetic', 'learn')" role="tab" aria-selected="false" aria-controls="monoalphabetic-learn">Learn More</button>
+                </div>
+                
+                <div id="monoalphabetic-encrypt" class="tab-content active" role="tabpanel">
+                    <div class="input-group">
+                        <label for="monoalphabetic-plaintext">Plain Text:</label>
+                        <textarea id="monoalphabetic-plaintext" rows="4" placeholder="Enter text to encrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="monoalphabetic-key">Key (26 unique letters):</label>
+                        <input type="text" id="monoalphabetic-key" placeholder="Enter key (e.g., HLXQPSVKMZYCDUEGJTNFBAIWOR)">
+                    </div>
+                    
+                    <button onclick="monoalphabeticEncrypt()">Encrypt</button>
+                    
+                    <div class="result-container" id="monoalphabetic-encrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="monoalphabetic-decrypt" class="tab-content" role="tabpanel">
+                    <div class="input-group">
+                        <label for="monoalphabetic-ciphertext">Cipher Text:</label>
+                        <textarea id="monoalphabetic-ciphertext" rows="4" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="monoalphabetic-decrypt-key">Key (26 unique letters):</label>
+                        <input type="text" id="monoalphabetic-decrypt-key" placeholder="Enter key (e.g., HLXQPSVKMZYCDUEGJTNFBAIWOR)">
+                    </div>
+                    
+                    <button onclick="monoalphabeticDecrypt()">Decrypt</button>
+                    
+                    <div class="result-container" id="monoalphabetic-decrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="monoalphabetic-learn" class="tab-content" role="tabpanel">
+                    <div class="explanation">
+                        <h3>What is the Monoalphabetic Cipher?</h3>
+                        <p>A substitution cipher where each letter in the plaintext is replaced by a different letter based on a fixed key.</p>
+                        <h3>How it Works:</h3>
+                        <p>Uses a 26-letter key to map each alphabet letter to another, preserving case and non-letters.</p>
+                        <h3>Security Considerations:</h3>
+                        <p>Vulnerable to frequency analysis due to fixed substitution.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vigenère Cipher Modal -->
+    <div id="vigenere-modal" class="modal" aria-labelledby="vigenere-modal-title" aria-hidden="true">
+        <div class="modal-content" role="dialog">
+            <button class="close-btn" onclick="closeModal('vigenere')" aria-label="Close">×</button>
+            <h2 class="modal-title" id="vigenere-modal-title">The Vigenère Cipher</h2>
+            
+            <div class="tab-container">
+                <div class="tab-buttons" role="tablist">
+                    <button class="tab-btn active" onclick="changeTab('vigenere', 'encrypt')" role="tab" aria-selected="true" aria-controls="vigenere-encrypt">Encrypt</button>
+                    <button class="tab-btn" onclick="changeTab('vigenere', 'decrypt')" role="tab" aria-selected="false" aria-controls="vigenere-decrypt">Decrypt</button>
+                    <button class="tab-btn" onclick="changeTab('vigenere', 'learn')" role="tab" aria-selected="false" aria-controls="vigenere-learn">Learn More</button>
+                </div>
+                
+                <div id="vigenere-encrypt" class="tab-content active" role="tabpanel">
+                    <div class="input-group">
+                        <label for="vigenere-plaintext">Plain Text:</label>
+                        <textarea id="vigenere-plaintext" rows="4" placeholder="Enter text to encrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="vigenere-key">Key (letters only):</label>
+                        <input type="text" id="vigenere-key" placeholder="Enter encryption key">
+                    </div>
+                    
+                    <button onclick="vigenereEncrypt()">Encrypt</button>
+                    
+                    <div class="result-container" id="vigenere-encrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="vigenere-decrypt" class="tab-content" role="tabpanel">
+                    <div class="input-group">
+                        <label for="vigenere-ciphertext">Cipher Text:</label>
+                        <textarea id="vigenere-ciphertext" rows="4" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="vigenere-decrypt-key">Key (letters only):</label>
+                        <input type="text" id="vigenere-decrypt-key" placeholder="Enter decryption key">
+                    </div>
+                    
+                    <button onclick="vigenereDecrypt()">Decrypt</button>
+                    
+                    <div class="result-container" id="vigenere-decrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="vigenere-learn" class="tab-content" role="tabpanel">
+                    <div class="explanation">
+                        <h3>What is the Vigenère Cipher?</h3>
+                        <p>A polyalphabetic substitution cipher using a keyword to shift letters.</p>
+                        <h3>How it Works:</h3>
+                        <p>Each letter is shifted based on the corresponding letter of the key, cycling the key as needed.</p>
+                        <h3>Security Considerations:</h3>
+                        <p>More secure than Caesar but vulnerable to Kasiski examination or frequency analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vigenère Autokey Cipher Modal -->
+    <div id="vigenere-autokey-modal" class="modal" aria-labelledby="vigenere-autokey-modal-title" aria-hidden="true">
+        <div class="modal-content" role="dialog">
+            <button class="close-btn" onclick="closeModal('vigenere-autokey')" aria-label="Close">×</button>
+            <h2 class="modal-title" id="vigenere-autokey-modal-title">Vigenère Autokey Cipher</h2>
+            
+            <div class="tab-container">
+                <div class="tab-buttons" role="tablist">
+                    <button class="tab-btn active" onclick="changeTab('vigenere-autokey', 'encrypt')" role="tab" aria-selected="true" aria-controls="vigenere-autokey-encrypt">Encrypt</button>
+                    <button class="tab-btn" onclick="changeTab('vigenere-autokey', 'decrypt')" role="tab" aria-selected="false" aria-controls="vigenere-autokey-decrypt">Decrypt</button>
+                    <button class="tab-btn" onclick="changeTab('vigenere-autokey', 'learn')" role="tab" aria-selected="false" aria-controls="vigenere-autokey-learn">Learn More</button>
+                </div>
+                
+                <div id="vigenere-autokey-encrypt" class="tab-content active" role="tabpanel">
+                    <div class="input-group">
+                        <label for="vigenere-autokey-plaintext">Plain Text:</label>
+                        <textarea id="vigenere-autokey-plaintext" rows="4" placeholder="Enter text to encrypt (e.g., NOPAINNOGAIN)"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="vigenere-autokey-key">Key (letters only):</label>
+                        <input type="text" id="vigenere-autokey-key" placeholder="Enter initial key (e.g., NOPAIN)">
+                    </div>
+                    
+                    <button onclick="vigenereAutokeyEncrypt()">Encrypt</button>
+                    
+                    <div class="result-container" id="vigenere-autokey-encrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="vigenere-autokey-decrypt" class="tab-content" role="tabpanel">
+                    <div class="input-group">
+                        <label for="vigenere-autokey-ciphertext">Cipher Text:</label>
+                        <textarea id="vigenere-autokey-ciphertext" rows="4" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="vigenere-autokey-decrypt-key">Key (letters only):</label>
+                        <input type="text" id="vigenere-autokey-decrypt-key" placeholder="Enter initial key (e.g., NOPAIN)">
+                    </div>
+                    
+                    <button onclick="vigenereAutokeyDecrypt()">Decrypt</button>
+                    
+                    <div class="result-container" id="vigenere-autokey-decrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="vigenere-autokey-learn" class="tab-content" role="tabpanel">
+                    <div class="explanation">
+                        <h3>What is the Vigenère Autokey Cipher?</h3>
+                        <p>An extension of the Vigenère cipher where the plaintext itself extends the key after the initial key.</p>
+                        <h3>How it Works:</h3>
+                        <p>Uses an initial key, then appends plaintext letters to the key for subsequent shifts.</p>
+                        <h3>Security Considerations:</h3>
+                        <p>More secure than standard Vigenère but still vulnerable to advanced analysis.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Playfair Cipher Modal -->
+    <div id="playfair-modal" class="modal" aria-labelledby="playfair-modal-title" aria-hidden="true">
+        <div class="modal-content" role="dialog">
+            <button class="close-btn" onclick="closeModal('playfair')" aria-label="Close">×</button>
+            <h2 class="modal-title" id="playfair-modal-title">Playfair Cipher</h2>
+            
+            <div class="tab-container">
+                <div class="tab-buttons" role="tablist">
+                    <button class="tab-btn active" onclick="changeTab('playfair', 'encrypt')" role="tab" aria-selected="true" aria-controls="playfair-encrypt">Encrypt</button>
+                    <button class="tab-btn" onclick="changeTab('playfair', 'decrypt')" role="tab" aria-selected="false" aria-controls="playfair-decrypt">Decrypt</button>
+                    <button class="tab-btn" onclick="changeTab('playfair', 'learn')" role="tab" aria-selected="false" aria-controls="playfair-learn">Learn More</button>
+                </div>
+                
+                <div id="playfair-encrypt" class="tab-content active" role="tabpanel">
+                    <div class="input-group">
+                        <label for="playfair-plaintext">Plain Text:</label>
+                        <textarea id="playfair-plaintext" rows="4" placeholder="Enter text to encrypt (e.g., LOVEISBLINDL)"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="playfair-key">Key (letters only):</label>
+                        <input type="text" id="playfair-key" placeholder="Enter key (e.g., HONESTY)">
+                    </div>
+                    
+                    <button onclick="playfairEncrypt()">Encrypt</button>
+                    
+                    <div class="result-container" id="playfair-encrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="playfair-decrypt" class="tab-content" role="tabpanel">
+                    <div class="input-group">
+                        <label for="playfair-ciphertext">Cipher Text:</label>
+                        <textarea id="playfair-ciphertext" rows="4" placeholder="Enter text to decrypt"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="playfair-decrypt-key">Key (letters only):</label>
+                        <input type="text" id="playfair-decrypt-key" placeholder="Enter key (e.g., HONESTY)">
+                    </div>
+                    
+                    <button onclick="playfairDecrypt()">Decrypt</button>
+                    
+                    <div class="result-container" id="playfair-decrypt-result" aria-live="polite">
+                        <!-- Results will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="playfair-learn" class="tab-content" role="tabpanel">
+                    <div class="explanation">
+                        <h3>What is the Playfair Cipher?</h3>
+                        <p>A digraph substitution cipher using a 5x5 matrix based on a key.</p>
+                        <h3>How it Works:</h3>
+                        <p>Pairs of letters are encrypted based on their positions in the matrix, with rules for same letters.</p>
+                        <h3>Security Considerations:</h3>
+                        <p>More secure than monoalphabetic but can be broken with known plaintext attacks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transposition Cipher Modal -->
+    <div id="transposition-modal" class="modal" aria-labelledby="transposition-modal-title" aria-hidden="true">
+        <div class="modal-content" role="dialog">
+            <button class="close-btn" onclick="closeModal('transposition')" aria-label="Close">×</

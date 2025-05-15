@@ -1,0 +1,195 @@
+/* Modern theme variables */
+:root {
+    --bg-dark: #1a1f2e;
+    --bg-card: #252b3b;
+    --text-primary: #ffffff;
+    --text-secondary: #b4bcd0;
+    --gradient-start: #4facfe;
+    --gradient-end: #00f2fe;
+    --card-hover: #2d344a;
+}
+
+/* General styles */
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    min-height: 100vh;
+}
+
+/* Hero section */
+.hero-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+.crypto-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.hexagon-icon {
+    width: 200px;
+    height: 200px;
+}
+
+.hexagon-icon path {
+    fill: none;
+    stroke: var(--gradient-start);
+    stroke-width: 2;
+}
+
+.hexagon-icon .inner-lines {
+    stroke: var(--gradient-end);
+    stroke-width: 1;
+    opacity: 0.5;
+}
+
+.hexagon-icon circle {
+    fill: var(--gradient-start);
+}
+
+/* Crypto sections */
+.crypto-section {
+    padding: 2rem;
+}
+
+.crypto-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.crypto-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.crypto-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.crypto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    background: var(--card-hover);
+    color: var(--text-primary);
+}
+
+.crypto-card:hover::before {
+    opacity: 0.1;
+}
+
+.card-content {
+    position: relative;
+    z-index: 2;
+}
+
+.crypto-card h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.crypto-card p {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.crypto-card .subtitle {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    opacity: 0.9;
+}
+
+.coming-soon {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(79, 172, 254, 0.1);
+    border: 1px solid var(--gradient-start);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--gradient-start);
+    font-weight: 600;
+}
+
+/* Form controls and output styling */
+.form-control {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    background-color: var(--bg-card);
+    border-color: var(--gradient-start);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem rgba(79, 172, 254, 0.25);
+}
+
+#encrypt-output, #decrypt-output {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+    padding: 1rem;
+    background-color: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 0;
+    }
+    
+    .crypto-section {
+        padding: 1rem;
+    }
+    
+    .crypto-grid {
+        gap: 1rem;
+    }
+    
+    .crypto-card {
+        padding: 1rem;
+    }
+} 

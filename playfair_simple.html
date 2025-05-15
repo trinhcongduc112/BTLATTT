@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Playfair Cipher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            gap: 5px;
+            margin: 20px 0;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border-radius: 4px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 8px;
+            width: 100%;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+        }
+        button {
+            background: #4CAF50;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Playfair Cipher</h1>
+        
+        <input type="text" id="text" placeholder="Nhập văn bản (ví dụ: HELLO)">
+        <input type="text" id="key" placeholder="Nhập khóa (ví dụ: MONARCHY)">
+        
+        <button onclick="encrypt()">Mã hóa</button>
+        <button onclick="decrypt()">Giải mã</button>
+
+        <div id="matrix" class="matrix"></div>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function createMatrix(key) {
+            // Tạo ma trận 5x5
+            let matrix = Array(5).fill().map(() => Array(5).fill(''));
+            let used = new Set();
+            let row = 0, col = 0;
+
+            // Xử lý khóa
+            key = key.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            
+            // Thêm các ký tự từ khóa
+            for (let char of key) {
+                if (!used.has(char)) {
+                    matrix[row][col] = char;
+                    used.add(char);
+                    col++;
+                    if (col === 5) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            }
+
+            // Thêm các ký tự còn lại của bảng chữ cái
+            for (let i = 65; i <= 90; i++) {
+                let char = String.fromCharCode(i);
+                if (char !== 'J' && !used.has(char)) {
+                    matrix[row][col] = char;
+                    used.add(char);
+                    col++;
+                    if (col === 5) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            }
+
+            return matrix;
+        }
+
+        function findPosition(matrix, char) {
+            char = char === 'J' ? 'I' : char;
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (matrix[i][j] === char) {
+                        return [i, j];
+                    }
+                }
+            }
+            return null;
+        }
+
+        function prepareText(text) {
+            text = text.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            let result = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                result += text[i];
+                if (i < text.length - 1) {
+                    if (text[i] === text[i + 1]) {
+                        result += 'X';
+                    }
+                }
+            }
+            
+            if (result.length % 2 !== 0) {
+                result += 'X';
+            }
+            
+            return result;
+        }
+
+        function displayMatrix(matrix) {
+            const matrixDiv = document.getElementById('matrix');
+            matrixDiv.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = matrix[i][j];
+                    matrixDiv.appendChild(cell);
+                }
+            }
+        }
+
+        function encrypt() {
+            const text = document.getElementById('text').value;
+            const key = document.getElementById('key').value;
+            
+            if (!text || !key) {
+                alert('Vui lòng nhập cả văn bản và khóa');
+                return;
+            }
+
+            const matrix = createMatrix(key);
+            displayMatrix(matrix);
+            
+            const preparedText = prepareText(text);
+            let result = '';
+            
+            for (let i = 0; i < preparedText.length; i += 2) {
+                const char1 = preparedText[i];
+                const char2 = preparedText[i + 1];
+                const [row1, col1] = findPosition(matrix, char1);
+                const [row2, col2] = findPosition(matrix, char2);
+                
+                let newChar1, newChar2;
+                
+                if (row1 === row2) { // Cùng hàng
+                    newChar1 = matrix[row1][(col1 + 1) % 5];
+                    newChar2 = matrix[row2][(col2 + 1) % 5];
+                } else if (col1 === col2) { // Cùng cột
+                    newChar1 = matrix[(row1 + 1) % 5][col1];
+                    newChar2 = matrix[(row2 + 1) % 5][col2];
+                } else { // Hình chữ nhật
+                    newChar1 = matrix[row1][col2];
+                    newChar2 = matrix[row2][col1];
+                }
+                
+                result += newChar1 + newChar2;
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <p><strong>Văn bản gốc:</strong> ${text}</p>
+                <p><strong>Văn bản chuẩn hóa:</strong> ${preparedText}</p>
+                <p><strong>Kết quả mã hóa:</strong> ${result}</p>
+            `;
+        }
+
+        function decrypt() {
+            const text = document.getElementById('text').value;
+            const key = document.getElementById('key').value;
+            
+            if (!text || !key) {
+                alert('Vui lòng nhập cả văn bản và khóa');
+                return;
+            }
+
+            const matrix = createMatrix(key);
+            displayMatrix(matrix);
+            
+            const preparedText = text.toUpperCase().replace(/[^A-Z]/g, '');
+            let result = '';
+            
+            for (let i = 0; i < preparedText.length; i += 2) {
+                const char1 = preparedText[i];
+                const char2 = preparedText[i + 1];
+                const [row1, col1] = findPosition(matrix, char1);
+                const [row2, col2] = findPosition(matrix, char2);
+                
+                let newChar1, newChar2;
+                
+                if (row1 === row2) { // Cùng hàng
+                    newChar1 = matrix[row1][(col1 + 4) % 5];
+                    newChar2 = matrix[row2][(col2 + 4) % 5];
+                } else if (col1 === col2) { // Cùng cột
+                    newChar1 = matrix[(row1 + 4) % 5][col1];
+                    newChar2 = matrix[(row2 + 4) % 5][col2];
+                } else { // Hình chữ nhật
+                    newChar1 = matrix[row1][col2];
+                    newChar2 = matrix[row2][col1];
+                }
+                
+                result += newChar1 + newChar2;
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <p><strong>Văn bản mã hóa:</strong> ${text}</p>
+                <p><strong>Kết quả giải mã:</strong> ${result}</p>
+            `;
+        }
+
+        // Khởi tạo với khóa mặc định
+        window.onload = function() {
+            const matrix = createMatrix('MONARCHY');
+            displayMatrix(matrix);
+        };
+    </script>
+</body>
+</html> 

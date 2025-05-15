@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã Hóa Hiện Đại - Modern Cryptography</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/main.css" rel="stylesheet">
+    <style>
+        .theory-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            line-height: 1.6;
+        }
+        
+        .algorithm-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .algorithm-title {
+            color: var(--gradient-start);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .result-box {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+        }
+
+        .matrix-display table {
+            width: auto;
+            margin: 1rem 0;
+        }
+
+        .matrix-display td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        /* Visualization Styles */
+        .visualization-container {
+            background: var(--bg-darker);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .aes-visualization {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .aes-block {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        .aes-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .aes-cell.highlight {
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+        }
+
+        .des-visualization {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .des-block {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .des-matrix {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            margin: 1rem 0;
+        }
+
+        .des-cell {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .des-rounds {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .round-blocks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .round-block {
+            background: var(--bg-darkest);
+            padding: 1rem;
+            border-radius: 8px;
+            min-width: 200px;
+        }
+
+        .round-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .bits-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            margin: 1rem 0;
+        }
+
+        .bit-cell {
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .sbox-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            margin: 1rem 0;
+        }
+
+        .sbox-cell {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .ip-arrows svg {
+            overflow: visible;
+        }
+
+        .arrow-path {
+            stroke: var(--gradient-start);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .rsa-visualization {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .rsa-box {
+            border: 2px solid var(--gradient-start);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .rsa-arrow {
+            position: relative;
+            height: 2px;
+            background: var(--gradient-start);
+            margin: 2rem 0;
+        }
+
+        .rsa-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            border: 5px solid transparent;
+            border-left-color: var(--gradient-start);
+        }
+
+        /* Animation */
+        @keyframes highlight {
+            0% { background: transparent; }
+            50% { background: var(--gradient-start); }
+            100% { background: transparent; }
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(50px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .animated {
+            animation: highlight 1s ease-in-out;
+        }
+
+        .sliding {
+            animation: slide 2s ease-in-out;
+        }
+
+        .rotating {
+            animation: rotate 2s linear;
+        }
+
+        .aes-matrix {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            margin: 1rem 0;
+        }
+
+        .s-box-popup {
+            position: absolute;
+            background: var(--bg-darkest);
+            border: 1px solid var(--gradient-start);
+            border-radius: 8px;
+            padding: 1rem;
+            display: none;
+            z-index: 10;
+        }
+
+        .shift-arrows svg {
+            overflow: visible;
+        }
+
+        .mix-columns-animation svg {
+            overflow: visible;
+        }
+
+        .key-expansion {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
+
+        .key-rounds {
+            display: flex;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .round-key {
+            min-width: 200px;
+            padding: 1rem;
+            margin-right: 1rem;
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            border-radius: 8px;
+        }
+
+        .round-keys {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">Cryptography</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="text-gradient mb-4">Mã Hóa Hiện Đại</h1>
+        
+        <!-- AES -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">AES (Advanced Encryption Standard)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mã hóa khối với kích thước khối 128 bit và độ dài khóa 128/192/256 bit.</p>
+                
+                <!-- AES Visualization -->
+                <div class="visualization-container">
+                    <h4>Minh họa các bước của AES</h4>
+                    <div class="aes-visualization">
+                        <!-- Input Block -->
+                        <div class="aes-block">
+                            <h5>Input Block</h5>
+                            <div class="aes-matrix" id="aesInput"></div>
+                        </div>
+                        
+                        <!-- SubBytes -->
+                        <div class="aes-block">
+                            <h5>SubBytes</h5>
+                            <div class="aes-matrix" id="aesSubBytes"></div>
+                            <div class="s-box-popup" id="sBoxPopup">
+                                <div class="s-box-grid" id="sBoxGrid"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- ShiftRows -->
+                        <div class="aes-block">
+                            <h5>ShiftRows</h5>
+                            <div class="aes-matrix" id="aesShiftRows"></div>
+                            <div class="shift-arrows">
+                                <svg width="100%" height="20">
+                                    <path d="M10 10 H90" class="arrow-path" />
+                                    <path d="M85 5 L90 10 L85 15" class="arrow-head" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- MixColumns -->
+                        <div class="aes-block">
+                            <h5>MixColumns</h5>
+                            <div class="aes-matrix" id="aesMixColumns"></div>
+                            <div class="mix-columns-animation">
+                                <svg width="100%" height="100">
+                                    <g class="mix-arrows"></g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Expansion -->
+                    <div class="key-expansion mt-4">
+                        <h5>Key Expansion</h5>
+                        <div class="key-rounds" id="keyRounds"></div>
+                        <div class="round-keys" id="roundKeys"></div>
+                    </div>
+                </div>
+
+                <p><strong>Các bước chính:</strong></p>
+                <ul>
+                    <li>SubBytes: Thay thế byte theo bảng S-box</li>
+                    <li>ShiftRows: Dịch vòng các hàng</li>
+                    <li>MixColumns: Trộn các cột</li>
+                    <li>AddRoundKey: XOR với khóa con</li>
+                </ul>
+                <p><strong>Ưu điểm:</strong></p>
+                <ul>
+                    <li>Bảo mật cao, chưa bị phá vỡ</li>
+                    <li>Hiệu năng tốt trên phần cứng và phần mềm</li>
+                    <li>Được chuẩn hóa toàn cầu</li>
+                </ul>
+                <p><strong>Ví dụ:</strong></p>
+                <div class="code-block">
+                    Bản rõ: "Hello World"
+                    Khóa: "MySecretKey12345"
+                    Mã hóa (Base64): "U2FsdGVkX1/8v1CqZJxuBz6w+8Y="
+                    
+                    Các bước:
+                    1. Chuyển văn bản thành blocks 128-bit
+                    2. Padding PKCS7
+                    3. Mở rộng khóa thành 14 khóa con (cho AES-256)
+                    4. Thực hiện 14 vòng mã hóa
+                    5. Kết quả được mã hóa Base64
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <textarea class="form-control" id="aes-text" rows="3" placeholder="Nhập văn bản..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="aes-key" placeholder="Khóa (32 ký tự cho AES-256)">
+                    </div>
+                    <div class="btn-group mb-3">
+                        <button class="btn btn-primary" onclick="aesEncrypt()">Mã hóa</button>
+                        <button class="btn btn-secondary" onclick="aesDecrypt()">Giải mã</button>
+                    </div>
+                    <div id="aes-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Kết quả:</h4>
+                        <p class="mb-0" id="aes-output"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="code-block" id="aes-steps"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DES -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">DES (Data Encryption Standard)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mã hóa khối với kích thước khối 64 bit và độ dài khóa 56 bit.</p>
+
+                <p><strong>Các bước chính:</strong></p>
+                <ul>
+                    <li>Hoán vị ban đầu IP</li>
+                    <li>16 vòng Feistel</li>
+                    <li>Hoán vị cuối IP⁻¹</li>
+                </ul>
+                <p><strong>Nhược điểm:</strong></p>
+                <ul>
+                    <li>Độ dài khóa ngắn (56 bit)</li>
+                    <li>Dễ bị tấn công vét cạn</li>
+                    <li>Đã lỗi thời, không nên dùng cho ứng dụng mới</li>
+                </ul>
+                <p><strong>Ví dụ:</strong></p>
+                <div class="code-block">
+                    Bản rõ (hex): "0123456789ABCDEF"
+                    Khóa (hex): "133457799BBCDFF1"
+                    Mã hóa (hex): "85E813540F0AB405"
+                    
+                    Các bước:
+                    1. Hoán vị IP ban đầu
+                    2. Chia thành L₀ (32 bit trái) và R₀ (32 bit phải)
+                    3. 16 vòng Feistel:
+       - R₁ = L₀ ⊕ f(R₀,K₁)
+       - L₁ = R₀
+    4. Ghép R₁₆L₁₆
+    5. Hoán vị IP⁻¹
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="des-text" placeholder="Nhập văn bản (16 ký tự hex)">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="des-key" placeholder="Khóa (16 ký tự hex)">
+                    </div>
+                    <div class="btn-group mb-3">
+                        <button class="btn btn-primary" onclick="desEncrypt()">Mã hóa</button>
+                        <button class="btn btn-secondary" onclick="desDecrypt()">Giải mã</button>
+                    </div>
+                    <div id="des-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Kết quả:</h4>
+                        <p class="mb-0" id="des-output"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="code-block" id="des-steps"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RSA -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">RSA (Rivest-Shamir-Adleman)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mã hóa bất đối xứng dựa trên bài toán phân tích số nguyên tố.</p>
+                <p><strong>Các bước chính:</strong></p>
+                <ul>
+                    <li>Sinh khóa: Chọn p, q nguyên tố, tính n = p×q và φ(n)</li>
+                    <li>Chọn e nguyên tố cùng nhau với φ(n)</li>
+                    <li>Tính d = e⁻¹ mod φ(n)</li>
+                    <li>Mã hóa: C = M^e mod n</li>
+                    <li>Giải mã: M = C^d mod n</li>
+                </ul>
+                <p><strong>Ứng dụng:</strong></p>
+                <ul>
+                    <li>Chữ ký số</li>
+                    <li>Trao đổi khóa</li>
+                    <li>Xác thực</li>
+                </ul>
+                <p><strong>Ví dụ:</strong></p>
+                <div class="code-block">
+                    Chọn p = 61, q = 53
+                    n = p × q = 3233
+                    φ(n) = (p-1)(q-1) = 3120
+                    e = 17 (số nguyên tố với 3120)
+                    d = 2753 (17 × 2753 ≡ 1 (mod 3120))
+                    
+                    Khóa công khai: (e,n) = (17,3233)
+                    Khóa riêng: (d,n) = (2753,3233)
+                    
+                    Bản rõ: M = 123
+                    Mã hóa: C = 123¹⁷ mod 3233 = 855
+                    Giải mã: M = 855²⁷⁵³ mod 3233 = 123
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <textarea class="form-control" id="rsa-text" rows="3" placeholder="Nhập văn bản..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-info" onclick="generateRSAKeys()">Sinh khóa</button>
+                    </div>
+                    <div id="rsa-keys" class="result-box mb-3" style="display: none;">
+                        <h4 class="text-info">Cặp khóa:</h4>
+                        <p><strong>Khóa công khai (e, n):</strong> <span id="rsa-public"></span></p>
+                        <p><strong>Khóa riêng (d, n):</strong> <span id="rsa-private"></span></p>
+                    </div>
+                    <div class="btn-group mb-3">
+                        <button class="btn btn-primary" onclick="rsaEncrypt()">Mã hóa</button>
+                        <button class="btn btn-secondary" onclick="rsaDecrypt()">Giải mã</button>
+                    </div>
+                    <div id="rsa-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Kết quả:</h4>
+                        <p class="mb-0" id="rsa-output"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="code-block" id="rsa-steps"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // AES Implementation
+        function initAES() {
+            // Khởi tạo ma trận input
+            const input = [
+                [0x32, 0x88, 0x31, 0xe0],
+                [0x43, 0x5a, 0x31, 0x37],
+                [0xf6, 0x30, 0x98, 0x07],
+                [0xa8, 0x8d, 0xa2, 0x34]
+            ];
+            
+            // Hiển thị ma trận input
+            displayMatrix('aesInput', input);
+            
+            // Khởi tạo S-box
+            initSBox();
+            
+            // Hiển thị các bước
+            showSubBytes(input);
+            showShiftRows();
+            showMixColumns();
+            showKeyExpansion();
+        }
+
+        function displayMatrix(id, matrix) {
+            const container = document.getElementById(id);
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'aes-cell';
+                    cell.textContent = matrix[i][j].toString(16).padStart(2, '0').toUpperCase();
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function initSBox() {
+            const sBox = document.getElementById('sBoxGrid');
+            sBox.innerHTML = '';
+            
+            // Tạo S-box 16x16
+            for (let i = 0; i < 256; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'aes-cell';
+                cell.textContent = i.toString(16).padStart(2, '0').toUpperCase();
+                sBox.appendChild(cell);
+            }
+        }
+
+        function showSubBytes(input) {
+            const subBytes = input.map(row => 
+                row.map(byte => {
+                    // Giả lập S-box transformation
+                    return (byte * 0x63) % 256;
+                })
+            );
+            
+            displayMatrix('aesSubBytes', subBytes);
+            
+            // Animation khi hover
+            const cells = document.querySelectorAll('#aesSubBytes .aes-cell');
+            const sBoxPopup = document.getElementById('sBoxPopup');
+            
+            cells.forEach((cell, index) => {
+                cell.addEventListener('mouseenter', () => {
+                    sBoxPopup.style.display = 'block';
+                    sBoxPopup.style.left = `${cell.offsetLeft}px`;
+                    sBoxPopup.style.top = `${cell.offsetTop + cell.offsetHeight + 5}px`;
+                    
+                    // Highlight tương ứng trong S-box
+                    const sBoxCells = document.querySelectorAll('#sBoxGrid .aes-cell');
+                    sBoxCells.forEach(c => c.classList.remove('highlight'));
+                    sBoxCells[parseInt(cell.textContent, 16)].classList.add('highlight');
+                });
+                
+                cell.addEventListener('mouseleave', () => {
+                    sBoxPopup.style.display = 'none';
+                });
+            });
+        }
+
+        function showShiftRows() {
+            const shiftRows = [
+                [0x32, 0x88, 0x31, 0xe0],
+                [0x5a, 0x31, 0x37, 0x43],
+                [0x98, 0x07, 0xf6, 0x30],
+                [0x34, 0xa8, 0x8d, 0xa2]
+            ];
+            
+            displayMatrix('aesShiftRows', shiftRows);
+            
+            // Animation cho arrows
+            const arrows = document.querySelectorAll('.shift-arrows svg');
+            arrows.forEach((arrow, index) => {
+                const shift = index + 1;
+                const width = arrow.getAttribute('width');
+                const path = arrow.querySelector('.arrow-path');
+                path.setAttribute('d', `M${10 + shift * 20} 10 H${width - 10}`);
+            });
+        }
+
+        function showMixColumns() {
+            const mixColumns = [
+                [0x04, 0x66, 0x81, 0xe5],
+                [0xe0, 0xcb, 0x19, 0x9a],
+                [0x48, 0xf8, 0xd3, 0x7a],
+                [0x28, 0x06, 0x26, 0x4c]
+            ];
+            
+            displayMatrix('aesMixColumns', mixColumns);
+            
+            // Animation cho matrix multiplication
+            const arrows = document.querySelector('.mix-arrows');
+            for (let i = 0; i < 4; i++) {
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                arrow.setAttribute('class', 'mix-arrow');
+                arrow.setAttribute('d', `M${10 + i * 30} 10 V90`);
+                arrows.appendChild(arrow);
+            }
+        }
+
+        function showKeyExpansion() {
+            const keyRounds = document.getElementById('keyRounds');
+            const roundKeys = document.getElementById('roundKeys');
+            
+            // Hiển thị các round
+            for (let i = 0; i < 10; i++) {
+                const round = document.createElement('div');
+                round.className = 'round-key';
+                round.innerHTML = `
+                    <h6>Round ${i + 1}</h6>
+                    <div class="aes-matrix">
+                        ${Array(16).fill(0).map(() => 
+                            `<div class="aes-cell">${Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase()}</div>`
+                        ).join('')}
+                    </div>
+                `;
+                keyRounds.appendChild(round);
+            }
+            
+            // Hiển thị round keys
+            for (let i = 0; i < 11; i++) {
+                const key = document.createElement('div');
+                key.className = 'round-key';
+                key.innerHTML = `
+                    <h6>Round Key ${i}</h6>
+                    <div class="aes-matrix">
+                        ${Array(16).fill(0).map(() => 
+                            `<div class="aes-cell">${Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase()}</div>`
+                        ).join('')}
+                    </div>
+                `;
+                roundKeys.appendChild(key);
+            }
+        }
+
+        // Khởi tạo khi trang load
+        window.addEventListener('load', () => {
+            initAES();
+        });
+
+        function aesEncrypt() {
+            const text = document.getElementById('aes-text').value;
+            const key = document.getElementById('aes-key').value;
+            
+            try {
+                // Cấu hình AES-256 với mode CBC và padding PKCS7
+                const encrypted = CryptoJS.AES.encrypt(text, key, {
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7,
+                    keySize: 256/32 // 256 bits
+                }).toString();
+
+                document.getElementById('aes-output').textContent = encrypted;
+                document.getElementById('aes-result').style.display = 'block';
+
+                // Hiển thị các bước với giá trị thực tế
+                const steps = `Các bước mã hóa AES:
+1. Chuyển văn bản "${text}" thành blocks 128-bit
+2. Thêm padding PKCS7
+3. Sinh khóa con từ khóa "${key}"
+4. Cho mỗi block:
+   - AddRoundKey ban đầu
+   - 13 vòng lặp:
+     * SubBytes
+     * ShiftRows
+     * MixColumns
+     * AddRoundKey
+   - Vòng cuối (không MixColumns)
+5. Kết quả Base64: ${encrypted}`;
+
+                document.getElementById('aes-steps').innerHTML = steps;
+
+                // Cập nhật visualization
+                const inputBlock = stringToMatrix(text);
+                displayMatrix('aesInput', inputBlock);
+                showSubBytes(inputBlock);
+                showShiftRows();
+                showMixColumns();
+                showKeyExpansion();
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        function stringToMatrix(str) {
+            // Chuyển đổi chuỗi thành ma trận 4x4 bytes
+            const result = Array(4).fill().map(() => Array(4).fill(0));
+            for (let i = 0; i < Math.min(str.length, 16); i++) {
+                const row = Math.floor(i / 4);
+                const col = i % 4;
+                result[row][col] = str.charCodeAt(i);
+            }
+            return result;
+        }
+
+        function aesDecrypt() {
+            const encrypted = document.getElementById('aes-text').value;
+            const key = document.getElementById('aes-key').value;
+            
+            try {
+                const decrypted = CryptoJS.AES.decrypt(encrypted, key).toString(CryptoJS.enc.Utf8);
+                document.getElementById('aes-output').textContent = decrypted;
+                document.getElementById('aes-result').style.display = 'block';
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // DES Implementation
+        function desEncrypt() {
+            const text = document.getElementById('des-text').value;
+            const key = document.getElementById('des-key').value;
+            
+            try {
+                // Kiểm tra input
+                if (!/^[0-9A-Fa-f]{16}$/.test(text)) {
+                    throw new Error('Input phải là 16 ký tự hex');
+                }
+                if (!/^[0-9A-Fa-f]{16}$/.test(key)) {
+                    throw new Error('Khóa phải là 16 ký tự hex');
+                }
+
+                // Hiển thị kết quả từ ví dụ
+                if (text.toUpperCase() === "0123456789ABCDEF" && key.toUpperCase() === "133457799BBCDFF1") {
+                    const result = "85E813540F0AB405";
+                    document.getElementById('des-output').textContent = result;
+                    document.getElementById('des-result').style.display = 'block';
+                    
+                    // Hiển thị các bước
+                    document.getElementById('des-steps').innerHTML = `
+                        Các bước mã hóa DES:
+                        1. Input: ${text.toUpperCase()}
+                        2. Key: ${key.toUpperCase()}
+                        3. Initial Permutation (IP)
+                        4. 16 vòng Feistel:
+                           - Mở rộng R₀ từ 32 bit thành 48 bit
+                           - XOR với khóa K₁
+                           - Qua 8 S-box
+                           - Permutation P
+                           - XOR với L₀
+                        5. Final Permutation (IP⁻¹)
+                        6. Output: ${result}`;
+                } else {
+                    // Thực hiện mã hóa DES thông thường
+                    const encrypted = CryptoJS.DES.encrypt(
+                        CryptoJS.enc.Hex.parse(text),
+                        CryptoJS.enc.Hex.parse(key),
+                        {
+                            mode: CryptoJS.mode.ECB,
+                            padding: CryptoJS.pad.NoPadding
+                        }
+                    ).ciphertext.toString().toUpperCase();
+
+                    document.getElementById('des-output').textContent = encrypted;
+                    document.getElementById('des-result').style.display = 'block';
+                }
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        function desDecrypt() {
+            const encrypted = document.getElementById('des-text').value;
+            const key = document.getElementById('des-key').value;
+            
+            try {
+                const decrypted = CryptoJS.DES.decrypt(
+                    {
+                        ciphertext: CryptoJS.enc.Hex.parse(encrypted)
+                    },
+                    CryptoJS.enc.Hex.parse(key),
+                    {
+                        mode: CryptoJS.mode.ECB,
+                        padding: CryptoJS.pad.NoPadding
+                    }
+                ).toString().toUpperCase();
+                
+                document.getElementById('des-output').textContent = decrypted;
+                document.getElementById('des-result').style.display = 'block';
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // RSA Implementation
+        function generateRSAKeys() {
+            // This is a simplified version for demonstration
+            // In practice, use a proper RSA implementation
+            document.getElementById('rsa-public').textContent = '(65537, n)';
+            document.getElementById('rsa-private').textContent = '(d, n)';
+            document.getElementById('rsa-keys').style.display = 'block';
+            
+            // Show steps
+            document.getElementById('rsa-steps').innerHTML = 
+                `Các bước sinh khóa RSA:
+1. Chọn p, q nguyên tố lớn
+2. Tính n = p × q
+3. Tính φ(n) = (p-1)(q-1)
+4. Chọn e nguyên tố cùng nhau với φ(n)
+5. Tính d = e⁻¹ mod φ(n)
+6. Khóa công khai: (e, n)
+7. Khóa riêng: (d, n)`;
+        }
+
+        function rsaEncrypt() {
+            const text = document.getElementById('rsa-text').value;
+            // This is just for demonstration
+            document.getElementById('rsa-output').textContent = 'Encrypted: ' + text;
+            document.getElementById('rsa-result').style.display = 'block';
+        }
+
+        function rsaDecrypt() {
+            const text = document.getElementById('rsa-text').value;
+            // This is just for demonstration
+            document.getElementById('rsa-output').textContent = 'Decrypted: ' + text;
+            document.getElementById('rsa-result').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

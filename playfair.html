@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playfair Cipher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .container {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .playfair-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 4px;
+            margin: 20px 0;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .grid-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #444;
+            color: #fff;
+            font-weight: bold;
+            font-size: 20px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .grid-cell.highlight {
+            background: #2196F3;
+            color: white;
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .grid-cell.highlight-rect {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #1976D2;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 4px;
+            color: #fff;
+        }
+
+        .steps {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            color: #fff;
+        }
+
+        .visualization {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .rule-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .rule-text {
+            font-size: 18px;
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Playfair Cipher</h1>
+        
+        <div class="input-group">
+            <label for="text">Text:</label>
+            <input type="text" id="text" placeholder="Enter text (letters only)">
+        </div>
+
+        <div class="input-group">
+            <label for="key">Key:</label>
+            <input type="text" id="key" value="MONARCHY" placeholder="Enter key">
+        </div>
+
+        <button onclick="encrypt()">Encrypt</button>
+        <button onclick="decrypt()">Decrypt</button>
+
+        <div class="rule-display">
+            <div class="rule-text" id="ruleText"></div>
+        </div>
+
+        <div id="playfairGrid" class="playfair-grid"></div>
+        
+        <div id="result" class="result"></div>
+        <div id="steps" class="steps"></div>
+    </div>
+
+    <script>
+        function createPlayfairMatrix(key) {
+            // Add debug logging
+            console.log('Creating matrix with key:', key);
+            
+            const matrix = Array(5).fill().map(() => Array(5).fill(''));
+            const used = new Set();
+            let row = 0, col = 0;
+
+            // Clean and prepare key
+            const cleanKey = key.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            console.log('Cleaned key:', cleanKey);
+
+            // Add key characters (excluding J)
+            for (let char of cleanKey) {
+                if (!used.has(char)) {
+                    matrix[row][col] = char;
+                    used.add(char);
+                    col++;
+                    if (col === 5) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            }
+
+            // Add remaining alphabet
+            for (let i = 65; i <= 90; i++) {
+                const char = String.fromCharCode(i);
+                if (char !== 'J' && !used.has(char)) {
+                    matrix[row][col] = char;
+                    used.add(char);
+                    col++;
+                    if (col === 5) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            }
+
+            // Debug: Print matrix
+            console.log('Generated matrix:');
+            matrix.forEach(row => console.log(row.join(' ')));
+            
+            return matrix;
+        }
+
+        function findPosition(matrix, char) {
+            // Replace J with I in input
+            const searchChar = char === 'J' ? 'I' : char;
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (matrix[i][j] === searchChar) {
+                        return { row: i, col: j };
+                    }
+                }
+            }
+            console.error('Character not found in matrix:', char);
+            return null;
+        }
+
+        function prepareText(text) {
+            console.log('Preparing text:', text);
+            
+            // Clean the text: uppercase and remove non-letters
+            text = text.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+            console.log('Cleaned text:', text);
+            
+            let prepared = '';
+            for (let i = 0; i < text.length; i++) {
+                prepared += text[i];
+                
+                // If we're not at the last character and next character forms a digraph
+                if (i < text.length - 1) {
+                    // If same letters would form a digraph, insert 'X'
+                    if (text[i] === text[i + 1]) {
+                        prepared += 'X';
+                    }
+                }
+            }
+            
+            // If odd length, add 'X' at the end
+            if (prepared.length % 2 !== 0) {
+                prepared += 'X';
+            }
+            
+            // Split into digraphs
+            let digraphs = [];
+            for (let i = 0; i < prepared.length; i += 2) {
+                digraphs.push(prepared.substr(i, 2));
+            }
+            
+            console.log('Prepared text:', prepared);
+            console.log('Digraphs:', digraphs.join(' '));
+            return prepared;
+        }
+
+        function highlightCells(pos1, pos2, type) {
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach(cell => cell.className = 'grid-cell');
+
+            if (type === 'row') {
+                cells[pos1.row * 5 + pos1.col].className = 'grid-cell highlight';
+                cells[pos2.row * 5 + pos2.col].className = 'grid-cell highlight';
+                cells[pos1.row * 5 + ((pos1.col + 1) % 5)].className = 'grid-cell highlight';
+                cells[pos2.row * 5 + ((pos2.col + 1) % 5)].className = 'grid-cell highlight';
+                document.getElementById('ruleText').textContent = 'Same Row Rule: Take letters to the right';
+            } else if (type === 'column') {
+                cells[pos1.row * 5 + pos1.col].className = 'grid-cell highlight';
+                cells[pos2.row * 5 + pos2.col].className = 'grid-cell highlight';
+                cells[((pos1.row + 1) % 5) * 5 + pos1.col].className = 'grid-cell highlight';
+                cells[((pos2.row + 1) % 5) * 5 + pos2.col].className = 'grid-cell highlight';
+                document.getElementById('ruleText').textContent = 'Same Column Rule: Take letters below';
+            } else if (type === 'rectangle') {
+                cells[pos1.row * 5 + pos1.col].className = 'grid-cell highlight';
+                cells[pos2.row * 5 + pos2.col].className = 'grid-cell highlight';
+                cells[pos1.row * 5 + pos2.col].className = 'grid-cell highlight-rect';
+                cells[pos2.row * 5 + pos1.col].className = 'grid-cell highlight-rect';
+                document.getElementById('ruleText').textContent = 'Rectangle Rule: Take letters at the corners';
+            }
+        }
+
+        function displayMatrix(matrix) {
+            const grid = document.getElementById('playfairGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.textContent = matrix[i][j];
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function encrypt() {
+            try {
+                const text = document.getElementById('text').value;
+                const key = document.getElementById('key').value;
+                
+                console.log('Starting encryption');
+                console.log('Input text:', text);
+                console.log('Input key:', key);
+                
+                if (!text || !key) {
+                    alert('Please enter both text and key');
+                    return;
+                }
+
+                const matrix = createPlayfairMatrix(key);
+                displayMatrix(matrix);
+                
+                const preparedText = prepareText(text);
+                let encrypted = '';
+                let steps = 'Encryption Steps:\n\n';
+                
+                for (let i = 0; i < preparedText.length; i += 2) {
+                    const char1 = preparedText[i];
+                    const char2 = preparedText[i + 1];
+                    console.log(`Processing pair: ${char1}${char2}`);
+                    
+                    const pos1 = findPosition(matrix, char1);
+                    const pos2 = findPosition(matrix, char2);
+                    
+                    if (!pos1 || !pos2) {
+                        throw new Error(`Could not find position for characters: ${char1} and/or ${char2}`);
+                    }
+                    
+                    console.log(`Positions: ${char1}(${pos1.row},${pos1.col}) ${char2}(${pos2.row},${pos2.col})`);
+                    
+                    let newChar1, newChar2;
+                    
+                    // Same row
+                    if (pos1.row === pos2.row) {
+                        newChar1 = matrix[pos1.row][(pos1.col + 1) % 5];
+                        newChar2 = matrix[pos2.row][(pos2.col + 1) % 5];
+                        steps += `${char1}${char2} → Same row → ${newChar1}${newChar2}\n`;
+                        console.log(`Same row rule: ${newChar1}${newChar2}`);
+                        highlightCells(pos1, pos2, 'row');
+                    }
+                    // Same column
+                    else if (pos1.col === pos2.col) {
+                        newChar1 = matrix[(pos1.row + 1) % 5][pos1.col];
+                        newChar2 = matrix[(pos2.row + 1) % 5][pos2.col];
+                        steps += `${char1}${char2} → Same column → ${newChar1}${newChar2}\n`;
+                        console.log(`Same column rule: ${newChar1}${newChar2}`);
+                        highlightCells(pos1, pos2, 'column');
+                    }
+                    // Rectangle case
+                    else {
+                        newChar1 = matrix[pos1.row][pos2.col];
+                        newChar2 = matrix[pos2.row][pos1.col];
+                        steps += `${char1}${char2} → Rectangle → ${newChar1}${newChar2}\n`;
+                        console.log(`Rectangle rule: ${newChar1}${newChar2}`);
+                        highlightCells(pos1, pos2, 'rectangle');
+                    }
+                    
+                    encrypted += newChar1 + newChar2;
+                }
+                
+                console.log('Final encrypted text:', encrypted);
+                
+                document.getElementById('result').innerHTML = `
+                    <strong>Original Text:</strong> ${text}<br>
+                    <strong>Prepared Text:</strong> ${preparedText}<br>
+                    <strong>Encrypted Text:</strong> ${encrypted}
+                `;
+                document.getElementById('steps').textContent = steps;
+                
+            } catch (error) {
+                console.error('Encryption error:', error);
+                alert('Error during encryption: ' + error.message);
+            }
+        }
+
+        function decrypt() {
+            try {
+                const text = document.getElementById('text').value;
+                const key = document.getElementById('key').value;
+                
+                if (!text || !key) {
+                    alert('Please enter both text and key');
+                    return;
+                }
+
+                const matrix = createPlayfairMatrix(key);
+                displayMatrix(matrix);
+                
+                const preparedText = text.toUpperCase().replace(/[^A-Z]/g, '');
+                let decrypted = '';
+                let steps = 'Decryption Steps:\n\n';
+                
+                for (let i = 0; i < preparedText.length; i += 2) {
+                    const char1 = preparedText[i];
+                    const char2 = preparedText[i + 1];
+                    const pos1 = findPosition(matrix, char1);
+                    const pos2 = findPosition(matrix, char2);
+                    
+                    let newChar1, newChar2;
+                    
+                    // Same row - move left
+                    if (pos1.row === pos2.row) {
+                        newChar1 = matrix[pos1.row][(pos1.col + 4) % 5];
+                        newChar2 = matrix[pos2.row][(pos2.col + 4) % 5];
+                        steps += `${char1}${char2} → Same row → ${newChar1}${newChar2}\n`;
+                        highlightCells(pos1, pos2, 'row');
+                    }
+                    // Same column - move up
+                    else if (pos1.col === pos2.col) {
+                        newChar1 = matrix[(pos1.row + 4) % 5][pos1.col];
+                        newChar2 = matrix[(pos2.row + 4) % 5][pos2.col];
+                        steps += `${char1}${char2} → Same column → ${newChar1}${newChar2}\n`;
+                        highlightCells(pos1, pos2, 'column');
+                    }
+                    // Rectangle case - swap columns
+                    else {
+                        newChar1 = matrix[pos1.row][pos2.col];
+                        newChar2 = matrix[pos2.row][pos1.col];
+                        steps += `${char1}${char2} → Rectangle → ${newChar1}${newChar2}\n`;
+                        highlightCells(pos1, pos2, 'rectangle');
+                    }
+                    
+                    decrypted += newChar1 + newChar2;
+                }
+                
+                document.getElementById('result').innerHTML = `
+                    <strong>Encrypted Text:</strong> ${text}<br>
+                    <strong>Decrypted Text:</strong> ${decrypted}
+                `;
+                document.getElementById('steps').textContent = steps;
+            } catch (error) {
+                console.error('Decryption error:', error);
+                alert('Error during decryption: ' + error.message);
+            }
+        }
+
+        // Initialize with example key
+        window.onload = function() {
+            const matrix = createPlayfairMatrix('MONARCHY');
+            displayMatrix(matrix);
+        };
+    </script>
+</body>
+</html> 

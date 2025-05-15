@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã Hóa Bất Đối Xứng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/main.css" rel="stylesheet">
+    <style>
+        .algorithm-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .visualization-container {
+            background: var(--bg-darker);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .key-generation {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .key-step {
+            background: var(--bg-darkest);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--gradient-start);
+        }
+
+        .step-number {
+            color: var(--gradient-start);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .calculation-box {
+            background: var(--bg-darkest);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .result-display {
+            font-family: monospace;
+            color: var(--gradient-end);
+            margin-top: 1rem;
+            word-break: break-all;
+        }
+
+        #rsaVisualization, #dsaVisualization, #eccVisualization {
+            width: 100%;
+            height: 300px;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .curve-canvas {
+            background: var(--bg-darkest);
+            border-radius: 8px;
+        }
+
+        .prime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 4px;
+            margin: 1rem 0;
+        }
+
+        .prime-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darkest);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .prime-cell.is-prime {
+            color: var(--gradient-start);
+            border: 1px solid var(--gradient-start);
+        }
+
+        .prime-cell:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">Cryptography</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <!-- RSA Section -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">RSA (Rivest-Shamir-Adleman)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Dựa trên bài toán phân tích số nguyên thành tích các số nguyên tố</p>
+                <div class="visualization-container">
+                    <h4>Minh họa quá trình tạo khóa</h4>
+                    <div id="rsaVisualization"></div>
+                    <div class="key-generation">
+                        <div class="key-step">
+                            <div class="step-number">Bước 1: Chọn p, q</div>
+                            <div class="prime-grid" id="rsaPrimeGrid"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 2: Tính n = p × q</div>
+                            <div id="rsaModulus"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 3: Tính φ(n)</div>
+                            <div id="rsaPhi"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 4: Chọn e</div>
+                            <div id="rsaPublicExp"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 5: Tính d</div>
+                            <div id="rsaPrivateExp"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="calculation-box">
+                    <h4>Tính toán RSA</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Số p (số nguyên tố)</label>
+                        <input type="number" class="form-control" id="rsaP">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số q (số nguyên tố)</label>
+                        <input type="number" class="form-control" id="rsaQ">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số e (số mũ công khai)</label>
+                        <input type="number" class="form-control" id="rsaE">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bản rõ (M)</label>
+                        <input type="number" class="form-control" id="rsaM">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateRSA()">Tính toán</button>
+                    <div class="result-display" id="rsaResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DSA Section -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">DSA (Digital Signature Algorithm)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Thuật toán chữ ký số dựa trên bài toán logarit rời rạc</p>
+                <div class="visualization-container">
+                    <h4>Minh họa quá trình ký và xác thực</h4>
+                    <div id="dsaVisualization"></div>
+                    <div class="key-generation">
+                        <div class="key-step">
+                            <div class="step-number">Bước 1: Chọn p, q</div>
+                            <div class="prime-grid" id="dsaPrimeGrid"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 2: Tính g</div>
+                            <div id="dsaGenerator"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 3: Chọn x</div>
+                            <div id="dsaPrivateKey"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Bước 4: Tính y</div>
+                            <div id="dsaPublicKey"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="calculation-box">
+                    <h4>Tính toán DSA</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Số p (số nguyên tố lớn)</label>
+                        <input type="number" class="form-control" id="dsaP">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số q (số nguyên tố nhỏ)</label>
+                        <input type="number" class="form-control" id="dsaQ">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Khóa riêng (x)</label>
+                        <input type="number" class="form-control" id="dsaX">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Thông điệp (M)</label>
+                        <input type="text" class="form-control" id="dsaM">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateDSA()">Tính toán</button>
+                    <div class="result-display" id="dsaResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ECC Section -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">ECC (Elliptic Curve Cryptography)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Dựa trên toán học của đường cong Elliptic trên trường hữu hạn</p>
+                <div class="visualization-container">
+                    <h4>Minh họa đường cong Elliptic</h4>
+                    <canvas id="eccVisualization" class="curve-canvas"></canvas>
+                    <div class="key-generation">
+                        <div class="key-step">
+                            <div class="step-number">Thông số đường cong</div>
+                            <div class="mb-3">
+                                <label class="form-label">a</label>
+                                <input type="number" class="form-control" id="eccA" value="-3">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">b</label>
+                                <input type="number" class="form-control" id="eccB" value="5">
+                            </div>
+                            <button class="btn btn-primary" onclick="drawECCurve()">Vẽ đường cong</button>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Điểm cơ sở G</div>
+                            <div id="eccBasePoint"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Khóa riêng d</div>
+                            <div id="eccPrivateKey"></div>
+                        </div>
+                        <div class="key-step">
+                            <div class="step-number">Khóa công khai Q = dG</div>
+                            <div id="eccPublicKey"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="calculation-box">
+                    <h4>Tính toán ECC</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Hệ số a</label>
+                        <input type="number" class="form-control" id="eccCalcA">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hệ số b</label>
+                        <input type="number" class="form-control" id="eccCalcB">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Điểm P (x,y)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="eccPx" placeholder="x">
+                            <input type="number" class="form-control" id="eccPy" placeholder="y">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số k (bội số)</label>
+                        <input type="number" class="form-control" id="eccK">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateECC()">Tính toán</button>
+                    <div class="result-display" id="eccResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Helper functions
+        function isPrime(n) {
+            if (n < 2) return false;
+            for (let i = 2; i <= Math.sqrt(n); i++) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+
+        function modInverse(a, m) {
+            let m0 = m;
+            let y = 0;
+            let x = 1;
+            if (m === 1) return 0;
+            while (a > 1) {
+                let q = Math.floor(a / m);
+                let t = m;
+                m = a % m;
+                a = t;
+                t = y;
+                y = x - q * y;
+                x = t;
+            }
+            if (x < 0) x += m0;
+            return x;
+        }
+
+        function gcd(a, b) {
+            if (b === 0) return a;
+            return gcd(b, a % b);
+        }
+
+        // RSA Implementation
+        function initRSA() {
+            const grid = document.getElementById('rsaPrimeGrid');
+            for (let i = 2; i <= 100; i++) {
+                const cell = document.createElement('div');
+                cell.className = `prime-cell ${isPrime(i) ? 'is-prime' : ''}`;
+                cell.textContent = i;
+                cell.onclick = () => selectPrime(i);
+                grid.appendChild(cell);
+            }
+        }
+
+        function calculateRSA() {
+            const p = parseInt(document.getElementById('rsaP').value);
+            const q = parseInt(document.getElementById('rsaQ').value);
+            const e = parseInt(document.getElementById('rsaE').value);
+            const m = parseInt(document.getElementById('rsaM').value);
+
+            if (!p || !q || !e || !m) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            if (!isPrime(p) || !isPrime(q)) {
+                alert('p và q phải là số nguyên tố');
+                return;
+            }
+
+            const n = p * q;
+            const phi = (p - 1) * (q - 1);
+            
+            if (gcd(e, phi) !== 1) {
+                alert('e phải nguyên tố cùng nhau với φ(n)');
+                return;
+            }
+
+            const d = modInverse(e, phi);
+            const c = modPow(m, e, n);
+            const decrypted = modPow(c, d, n);
+
+            document.getElementById('rsaResult').innerHTML = `
+                n = p × q = ${n}<br>
+                φ(n) = (p-1) × (q-1) = ${phi}<br>
+                d = ${d}<br>
+                Bản mã (C) = ${c}<br>
+                Giải mã = ${decrypted}
+            `;
+        }
+
+        // DSA Implementation
+        function initDSA() {
+            const grid = document.getElementById('dsaPrimeGrid');
+            for (let i = 2; i <= 100; i++) {
+                const cell = document.createElement('div');
+                cell.className = `prime-cell ${isPrime(i) ? 'is-prime' : ''}`;
+                cell.textContent = i;
+                cell.onclick = () => selectDSAPrime(i);
+                grid.appendChild(cell);
+            }
+        }
+
+        function calculateDSA() {
+            const p = parseInt(document.getElementById('dsaP').value);
+            const q = parseInt(document.getElementById('dsaQ').value);
+            const x = parseInt(document.getElementById('dsaX').value);
+            const m = document.getElementById('dsaM').value;
+
+            if (!p || !q || !x || !m) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            if (!isPrime(p) || !isPrime(q)) {
+                alert('p và q phải là số nguyên tố');
+                return;
+            }
+
+            // Calculate g
+            const h = 2;
+            const g = modPow(h, (p - 1) / q, p);
+            
+            // Calculate public key y
+            const y = modPow(g, x, p);
+            
+            // Generate k (random for demo)
+            const k = Math.floor(Math.random() * (q - 1)) + 1;
+            
+            // Calculate signature
+            const r = modPow(g, k, p) % q;
+            const hash = simpleHash(m);
+            const s = (modInverse(k, q) * (hash + x * r)) % q;
+
+            document.getElementById('dsaResult').innerHTML = `
+                g = ${g}<br>
+                y = ${y}<br>
+                k = ${k}<br>
+                r = ${r}<br>
+                s = ${s}<br>
+                Hash(M) = ${hash}
+            `;
+        }
+
+        // ECC Implementation
+        function initECC() {
+            const canvas = document.getElementById('eccVisualization');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            drawECCurve();
+        }
+
+        function drawECCurve() {
+            const canvas = document.getElementById('eccVisualization');
+            const ctx = canvas.getContext('2d');
+            const a = parseFloat(document.getElementById('eccA').value);
+            const b = parseFloat(document.getElementById('eccB').value);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#4FACFE';
+            ctx.lineWidth = 2;
+
+            // Transform coordinates
+            const scale = 20;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 2;
+
+            // Draw axes
+            ctx.beginPath();
+            ctx.moveTo(0, offsetY);
+            ctx.lineTo(canvas.width, offsetY);
+            ctx.moveTo(offsetX, 0);
+            ctx.lineTo(offsetX, canvas.height);
+            ctx.strokeStyle = '#666';
+            ctx.stroke();
+
+            // Draw curve y² = x³ + ax + b
+            ctx.beginPath();
+            for (let x = -10; x <= 10; x += 0.1) {
+                const rhs = x * x * x + a * x + b;
+                if (rhs < 0) continue;
+                const y = Math.sqrt(rhs);
+                
+                const px = x * scale + offsetX;
+                const py1 = -y * scale + offsetY;
+                const py2 = y * scale + offsetY;
+                
+                ctx.moveTo(px, py1);
+                ctx.lineTo(px, py1);
+                ctx.moveTo(px, py2);
+                ctx.lineTo(px, py2);
+            }
+            ctx.strokeStyle = '#4FACFE';
+            ctx.stroke();
+        }
+
+        function calculateECC() {
+            const a = parseInt(document.getElementById('eccCalcA').value);
+            const b = parseInt(document.getElementById('eccCalcB').value);
+            const px = parseInt(document.getElementById('eccPx').value);
+            const py = parseInt(document.getElementById('eccPy').value);
+            const k = parseInt(document.getElementById('eccK').value);
+
+            if (isNaN(a) || isNaN(b) || isNaN(px) || isNaN(py) || isNaN(k)) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            // Check if point is on curve
+            const lhs = py * py;
+            const rhs = px * px * px + a * px + b;
+            if (lhs !== rhs) {
+                alert('Điểm P không nằm trên đường cong');
+                return;
+            }
+
+            // Calculate kP using double-and-add method
+            let rx = px;
+            let ry = py;
+            let result = 'Các bước tính:\n';
+            
+            for (let i = 1; i < k; i++) {
+                // Point doubling
+                const s = (3 * rx * rx + a) / (2 * ry);
+                const xr = s * s - 2 * rx;
+                const yr = s * (rx - xr) - ry;
+                rx = xr;
+                ry = yr;
+                result += `${i+1}P = (${rx.toFixed(2)}, ${ry.toFixed(2)})\n`;
+            }
+
+            document.getElementById('eccResult').innerHTML = result;
+        }
+
+        // Helper functions
+        function modPow(base, exponent, modulus) {
+            if (modulus === 1) return 0;
+            let result = 1;
+            base = base % modulus;
+            while (exponent > 0) {
+                if (exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                base = (base * base) % modulus;
+                exponent = Math.floor(exponent / 2);
+            }
+            return result;
+        }
+
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        // Initialize visualizations
+        document.addEventListener('DOMContentLoaded', function() {
+            initRSA();
+            initDSA();
+            initECC();
+        });
+    </script>
+</body>
+</html> 

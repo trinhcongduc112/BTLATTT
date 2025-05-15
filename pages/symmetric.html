@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã Hóa Đối Xứng Hiện Đại</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../styles/main.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        .theory-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            line-height: 1.6;
+        }
+        
+        .algorithm-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .algorithm-title {
+            color: var(--gradient-start);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .result-box {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+        }
+
+        .visualization-container {
+            background: var(--bg-darker);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .matrix-grid {
+            display: grid;
+            gap: 4px;
+            margin: 1rem 0;
+            max-width: 500px;
+        }
+
+        .matrix-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darkest);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .matrix-cell.highlight {
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+            transform: scale(1.1);
+        }
+
+        .permutation-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--bg-darkest);
+            border-radius: 8px;
+        }
+
+        .permutation-row {
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+        }
+
+        .permutation-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darker);
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--text-primary);
+        }
+
+        .permutation-arrow {
+            position: absolute;
+            width: 2px;
+            background: var(--gradient-start);
+            transform-origin: top;
+            z-index: 1;
+        }
+
+        .vigenere-table {
+            display: grid;
+            grid-template-columns: repeat(27, 30px);
+            grid-template-rows: repeat(27, 30px);
+            gap: 1px;
+            background: var(--bg-darker);
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .vigenere-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darkest);
+            color: var(--text-primary);
+            font-family: monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .vigenere-cell.header {
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+            font-weight: bold;
+        }
+
+        .vigenere-cell.active {
+            background: var(--gradient-end);
+            color: var(--bg-darkest);
+            transform: scale(1.1);
+        }
+
+        .key-stream {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--bg-darkest);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .key-char {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darker);
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--gradient-start);
+        }
+
+        .calculation-box {
+            background: var(--bg-darkest);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .result-display {
+            font-family: monospace;
+            color: var(--gradient-end);
+            margin-top: 1rem;
+            word-break: break-all;
+        }
+
+        .modulo-visualization {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .modulo-circle {
+            width: 300px;
+            height: 300px;
+            position: relative;
+        }
+        
+        .modulo-steps {
+            flex: 1;
+            margin-left: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .step-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .number-line {
+            height: 60px;
+            position: relative;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        
+        .number-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--gradient-start);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            transition: left 0.5s ease;
+        }
+        
+        .division-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient-start);
+            top: 50%;
+        }
+        
+        .division-process {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-family: monospace;
+        }
+        
+        .quotient, .remainder {
+            padding: 1rem;
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            border-radius: 4px;
+            margin: 0 0.5rem;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .modulo-grid {
+            margin-top: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .grid-header {
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+        }
+        
+        .grid-content {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 1px;
+            background: rgba(255,255,255,0.1);
+            padding: 1px;
+        }
+        
+        .grid-cell {
+            background: var(--bg-card);
+            padding: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .grid-cell.highlight {
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+        }
+
+        .playfair-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            max-width: 300px;
+            margin: 1rem 0;
+        }
+
+        .playfair-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-darkest);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .playfair-cell.highlight {
+            background: var(--gradient-start);
+            color: var(--bg-darkest);
+            transform: scale(1.1);
+        }
+
+        .playfair-pairs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--bg-darkest);
+            border-radius: 8px;
+        }
+
+        .playfair-pair {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid var(--gradient-start);
+            border-radius: 4px;
+            padding: 0.5rem;
+        }
+
+        .pair-text {
+            font-family: monospace;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pair-arrow {
+            color: var(--gradient-start);
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <div class="container">
+            <a class="navbar-brand" href="../index.html">Cryptography</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="text-gradient mb-4">Mã Hóa Đối Xứng Hiện Đại</h1>
+
+        <!-- Modulo Section -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">Mã hóa Modulo</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mã hóa dựa trên phép toán chia lấy dư</p>
+                <div class="visualization-container">
+                    <h4>Minh họa phép toán Modulo</h4>
+                    <div class="modulo-visualization">
+                        <!-- Số trục tròn -->
+                        <div class="modulo-circle">
+                            <svg width="300" height="300" viewBox="0 0 300 300">
+                                <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                                <g id="numbers"></g>
+                                <g id="pointer">
+                                    <line x1="150" y1="150" x2="290" y2="150" stroke="var(--gradient-start)" stroke-width="2"/>
+                                    <circle cx="150" cy="150" r="5" fill="var(--gradient-start)"/>
+                                </g>
+                            </svg>
+                        </div>
+                        
+                        <!-- Minh họa quá trình -->
+                        <div class="modulo-steps">
+                            <div class="step-container">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <div class="number-line">
+                                        <div class="number-marker" id="dividend"></div>
+                                        <div class="division-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="step-container">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <div class="division-process">
+                                        <div class="quotient" id="quotient"></div>
+                                        <div class="remainder" id="remainder"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bảng số modulo -->
+                    <div class="modulo-grid" id="moduloGrid">
+                        <div class="grid-header">Bảng số Modulo</div>
+                        <div class="grid-content"></div>
+                    </div>
+                </div>
+                
+                <div class="calculation-box">
+                    <h4>Tính toán Modulo</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Số cần chia (a)</label>
+                        <input type="number" class="form-control" id="moduloA">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số chia (m)</label>
+                        <input type="number" class="form-control" id="moduloM">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateModulo()">Tính toán</button>
+                    <div class="result-display" id="moduloResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Permutation Section -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">Mã hóa Hoán vị</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mã hóa bằng cách hoán đổi vị trí các ký tự theo một khóa cho trước</p>
+                <div class="code-block">
+Ví dụ:
+Văn bản: HELLO
+Khóa:    3,1,4,2,5 (số thứ tự vị trí mới của mỗi ký tự)
+Kết quả: EHLLO
+
+Giải thích:
+H -> vị trí 3 
+E -> vị trí 1
+L -> vị trí 4
+L -> vị trí 2
+O -> vị trí 5
+                </div>
+                <div class="visualization-container">
+                    <h4>Minh họa hoán vị</h4>
+                    <div class="permutation-diagram" id="permutationDiagram">
+                        <div class="permutation-row original-text"></div>
+                        <div class="permutation-row permuted-text"></div>
+                    </div>
+                </div>
+                <div class="calculation-box">
+                    <h4>Tính toán Hoán vị</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Văn bản (không dấu, không khoảng trắng)</label>
+                        <input type="text" class="form-control" id="permText" placeholder="Ví dụ: HELLO">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Khóa hoán vị (các số từ 1 đến N, cách nhau bởi dấu phẩy)</label>
+                        <input type="text" class="form-control" id="permKey" placeholder="Ví dụ: 3,1,4,2,5">
+                        <div class="form-text text-light">
+                            - Độ dài khóa phải bằng độ dài văn bản<br>
+                            - Mỗi số chỉ xuất hiện một lần<br>
+                            - Số nhỏ nhất là 1, số lớn nhất bằng độ dài văn bản
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="calculatePermutation()">Mã hóa</button>
+                    <button class="btn btn-secondary" onclick="decryptPermutation()">Giải mã</button>
+                    <div class="result-display" id="permResult"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mã hóa chữ đơn -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">Mã hóa chữ đơn (Monoalphabetic Cipher)</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Thay thế mỗi ký tự trong bảng chữ cái bằng một ký tự khác theo một ánh xạ cố định.</p>
+                <p><strong>Ví dụ:</strong></p>
+                <div class="code-block">
+                    Bảng chữ cái gốc:    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                    Bảng chữ cái thay thế: HLXQPSVKMZYCDUEGJTNFBAIWOR
+                    
+                    Bản rõ:  THEGRASSAREALWAY
+                    Bản mã:  BKPVNHWWHNPHDAHZ
+                </div>
+                <p><strong>Đặc điểm:</strong></p>
+                <ul>
+                    <li>Mỗi ký tự trong bảng chữ cái được thay thế bởi một ký tự duy nhất</li>
+                    <li>Ánh xạ giữa các ký tự là 1-1</li>
+                    <li>Dễ bị phân tích tần suất</li>
+                </ul>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="mono-text" placeholder="Nhập văn bản (chỉ chữ cái)">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="mono-key" placeholder="Khóa (26 chữ cái in hoa)" value="HLXQPSVKMZYCDUEGJTNFBAIWOR">
+                    </div>
+                    <div class="btn-group mb-3">
+                        <button class="btn btn-primary" onclick="monoEncrypt()">Mã hóa</button>
+                        <button class="btn btn-secondary" onclick="monoDecrypt()">Giải mã</button>
+                    </div>
+                    <div id="mono-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Kết quả:</h4>
+                        <p class="mb-0" id="mono-output"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="code-block" id="mono-steps"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playfair Cipher -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">Mã hóa Playfair</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mã hóa từng cặp chữ cái dựa trên vị trí của chúng trong ma trận 5x5 được tạo từ khóa.</p>
+                <p><strong>Ví dụ:</strong></p>
+                <div class="code-block">
+Khóa: MONARCHY
+Ma trận 5x5:
+M O N A R
+C H Y B D
+E F G I K
+L P Q S T
+U V W X Z
+
+Bản rõ:  HELLO WORLD
+Chuẩn hóa: HE LX LO WO RL DX
+Mã hóa:
+HE -> KG (cùng hàng, lấy ký tự bên phải)
+LX -> PX (cùng hàng, lấy ký tự bên phải)
+LO -> IR (hình chữ nhật)
+WO -> VO (cùng hàng, lấy ký tự bên phải)
+RL -> QF (hình chữ nhật)
+DX -> BX (hình chữ nhật)
+
+Bản mã: KGPXIRVOQFBX
+                </div>
+                <p><strong>Quy tắc:</strong></p>
+                <ul>
+                    <li>Tạo ma trận 5x5 từ khóa (bỏ ký tự trùng lặp, I/J dùng chung ô)</li>
+                    <li>Chia văn bản thành các cặp 2 chữ cái</li>
+                    <li>Nếu 2 chữ cái giống nhau, chèn 'X' vào giữa</li>
+                    <li>Nếu còn 1 chữ, thêm 'X' vào cuối</li>
+                    <li>Quy tắc mã hóa từng cặp:
+                        <ul>
+                            <li>Cùng hàng: lấy ký tự bên phải (quay vòng)</li>
+                            <li>Cùng cột: lấy ký tự bên dưới (quay vòng)</li>
+                            <li>Khác hàng cột: lấy ký tự ở góc còn lại của hình chữ nhật</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="visualization-container">
+                    <h4>Ma trận Playfair</h4>
+                    <div class="playfair-grid" id="playfairGrid"></div>
+                    <div class="playfair-pairs" id="playfairPairs"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="playfair-text" placeholder="Nhập văn bản (chỉ chữ cái)">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="playfair-key" placeholder="Nhập khóa" value="MONARCHY">
+                    </div>
+                    <div class="btn-group mb-3">
+                        <button class="btn btn-primary" onclick="playfairEncrypt()">Mã hóa</button>
+                        <button class="btn btn-secondary" onclick="playfairDecrypt()">Giải mã</button>
+                    </div>
+                    <div id="playfair-result" class="result-box mt-3" style="display: none;">
+                        <h4 class="text-info">Kết quả:</h4>
+                        <p class="mb-0" id="playfair-output"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="code-block" id="playfair-steps"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vigenere Autokey Section -->
+        <div class="algorithm-section">
+            <h2 class="algorithm-title">Mã hóa Vigenère Autokey</h2>
+            <div class="theory-text mb-4">
+                <p><strong>Nguyên lý:</strong> Mở rộng của Vigenère với khóa tự động từ bản rõ</p>
+                <div class="visualization-container">
+                    <h4>Minh họa tạo khóa tự động</h4>
+                    <div class="vigenere-table" id="vigenereTable"></div>
+                    <div class="key-stream" id="keyStream"></div>
+                </div>
+                <div class="calculation-box">
+                    <h4>Tính toán Vigenère Autokey</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Văn bản</label>
+                        <input type="text" class="form-control" id="autoText">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Khóa ban đầu</label>
+                        <input type="text" class="form-control" id="autoKey">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateAutokey()">Tính toán</button>
+                    <div class="result-display" id="autoResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modulo Implementation
+        function initModulo() {
+            // Khởi tạo số trên vòng tròn
+            const numbers = document.getElementById('numbers');
+            const radius = 140;
+            const center = 150;
+            
+            for (let i = 0; i < 12; i++) {
+                const angle = (i * 30) * Math.PI / 180;
+                const x = center + radius * Math.cos(angle);
+                const y = center + radius * Math.sin(angle);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x);
+                text.setAttribute("y", y);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("dominant-baseline", "middle");
+                text.setAttribute("fill", "white");
+                text.textContent = i;
+                
+                numbers.appendChild(text);
+            }
+
+            // Khởi tạo grid
+            const gridContent = document.querySelector('.grid-content');
+            for (let i = 0; i < 100; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.textContent = i;
+                gridContent.appendChild(cell);
+            }
+        }
+
+        function calculateModulo() {
+            const a = parseInt(document.getElementById('moduloA').value);
+            const m = parseInt(document.getElementById('moduloM').value);
+
+            if (!a || !m) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            const quotient = Math.floor(a / m);
+            const remainder = a % m;
+
+            // Hiển thị kết quả
+            document.getElementById('moduloResult').innerHTML = `
+                ${a} = ${m} × ${quotient} + ${remainder}<br>
+                ${a} ≡ ${remainder} (mod ${m})
+            `;
+
+            // Animation cho con trỏ trên vòng tròn
+            const pointer = document.getElementById('pointer');
+            const angle = (remainder * 30) * Math.PI / 180;
+            pointer.style.transform = `rotate(${angle}rad)`;
+            pointer.style.transformOrigin = '150px 150px';
+
+            // Animation cho marker trên number line
+            const dividend = document.getElementById('dividend');
+            const lineWidth = dividend.parentElement.offsetWidth;
+            const position = (a / 100) * lineWidth;
+            dividend.style.left = `${position}px`;
+
+            // Hiển thị thương và số dư
+            document.getElementById('quotient').textContent = quotient;
+            document.getElementById('remainder').textContent = remainder;
+
+            // Highlight các số trong grid
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach(cell => cell.classList.remove('highlight'));
+            
+            // Highlight các số chia hết cho m
+            for (let i = 0; i < 100; i++) {
+                if (i % m === remainder) {
+                    cells[i].classList.add('highlight');
+                }
+            }
+
+            // Animation cho quá trình
+            animateModuloProcess(a, m, quotient, remainder);
+        }
+
+        function animateModuloProcess(a, m, quotient, remainder) {
+            const steps = [];
+            
+            // Tạo các bước animation
+            for (let i = 0; i <= quotient; i++) {
+                steps.push({
+                    value: i * m,
+                    type: 'subtract',
+                    text: `Trừ ${m} lần thứ ${i + 1}`
+                });
+            }
+            
+            // Thêm bước cuối cùng (số dư)
+            steps.push({
+                value: remainder,
+                type: 'remainder',
+                text: `Số dư: ${remainder}`
+            });
+
+            // Thực hiện animation
+            let currentStep = 0;
+            const interval = setInterval(() => {
+                if (currentStep >= steps.length) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                const step = steps[currentStep];
+                const marker = document.getElementById('dividend');
+                const lineWidth = marker.parentElement.offsetWidth;
+                const position = (step.value / 100) * lineWidth;
+                
+                marker.style.left = `${position}px`;
+                
+                if (step.type === 'subtract') {
+                    marker.style.background = 'var(--gradient-start)';
+                } else {
+                    marker.style.background = '#4CAF50';
+                }
+
+                currentStep++;
+            }, 1000);
+        }
+
+        // Permutation Implementation
+        function initPermutation() {
+            // Khởi tạo ví dụ mặc định
+            document.getElementById('permText').value = 'HELLO';
+            document.getElementById('permKey').value = '3,1,4,2,5';
+            calculatePermutation();
+        }
+
+        function validatePermutationKey(text, key) {
+            // Kiểm tra độ dài khóa
+            if (key.length !== text.length) {
+                alert('Độ dài khóa phải bằng độ dài văn bản');
+                return false;
+            }
+
+            // Kiểm tra giá trị trong khóa
+            const validNumbers = new Set(key);
+            for (let i = 1; i <= text.length; i++) {
+                if (!validNumbers.has(i)) {
+                    alert('Khóa phải chứa các số từ 1 đến ' + text.length + ' (không trùng lặp)');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function calculatePermutation() {
+            const text = document.getElementById('permText').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const keyStr = document.getElementById('permKey').value.trim();
+            
+            if (!text) {
+                alert('Vui lòng nhập văn bản');
+                return;
+            }
+            
+            if (!keyStr) {
+                alert('Vui lòng nhập khóa hoán vị');
+                return;
+            }
+
+            const key = keyStr.split(',').map(Number);
+            
+            if (!validatePermutationKey(text, key)) {
+                return;
+            }
+
+            // Mã hóa: đặt ký tự vào vị trí mới theo khóa
+            const result = new Array(text.length);
+            for (let i = 0; i < text.length; i++) {
+                result[key[i] - 1] = text[i];
+            }
+
+            // Hiển thị kết quả
+            document.getElementById('permResult').innerHTML = `
+                <h5>Kết quả mã hóa:</h5>
+                Văn bản gốc: ${text}<br>
+                Khóa hoán vị: ${key.join(',')}<br>
+                Văn bản mã hóa: ${result.join('')}
+            `;
+
+            // Hiển thị minh họa
+            showPermutationVisualization(text, key, result.join(''));
+        }
+
+        function decryptPermutation() {
+            const text = document.getElementById('permText').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const keyStr = document.getElementById('permKey').value.trim();
+            
+            if (!text) {
+                alert('Vui lòng nhập văn bản');
+                return;
+            }
+            
+            if (!keyStr) {
+                alert('Vui lòng nhập khóa hoán vị');
+                return;
+            }
+
+            const key = keyStr.split(',').map(Number);
+            
+            if (!validatePermutationKey(text, key)) {
+                return;
+            }
+
+            // Giải mã: lấy ký tự từ vị trí theo khóa
+            const result = new Array(text.length);
+            for (let i = 0; i < text.length; i++) {
+                result[i] = text[key[i] - 1];
+            }
+
+            // Hiển thị kết quả
+            document.getElementById('permResult').innerHTML = `
+                <h5>Kết quả giải mã:</h5>
+                Văn bản mã hóa: ${text}<br>
+                Khóa hoán vị: ${key.join(',')}<br>
+                Văn bản gốc: ${result.join('')}
+            `;
+
+            // Hiển thị minh họa
+            showPermutationVisualization(text, key, result.join(''), false);
+        }
+
+        function showPermutationVisualization(input, key, output, isEncrypt = true) {
+            const container = document.querySelector('.permutation-diagram');
+            container.innerHTML = '';
+
+            // Tạo hàng chỉ số
+            const indexRow = document.createElement('div');
+            indexRow.className = 'permutation-row';
+            for (let i = 0; i < input.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'permutation-cell';
+                cell.style.background = 'var(--gradient-start)';
+                cell.style.color = 'var(--bg-darkest)';
+                cell.textContent = i + 1;
+                indexRow.appendChild(cell);
+            }
+            container.appendChild(indexRow);
+
+            // Tạo hàng văn bản đầu vào
+            const inputRow = document.createElement('div');
+            inputRow.className = 'permutation-row';
+            for (let i = 0; i < input.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'permutation-cell';
+                cell.textContent = input[i];
+                inputRow.appendChild(cell);
+            }
+            container.appendChild(inputRow);
+
+            // Tạo hàng mũi tên
+            const arrowRow = document.createElement('div');
+            arrowRow.className = 'permutation-row';
+            arrowRow.style.height = '60px';
+            arrowRow.style.position = 'relative';
+            container.appendChild(arrowRow);
+
+            // Tạo hàng văn bản đầu ra
+            const outputRow = document.createElement('div');
+            outputRow.className = 'permutation-row';
+            for (let i = 0; i < output.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'permutation-cell';
+                cell.textContent = output[i];
+                outputRow.appendChild(cell);
+            }
+            container.appendChild(outputRow);
+
+            // Vẽ mũi tên
+            setTimeout(() => {
+                const inputCells = inputRow.getElementsByClassName('permutation-cell');
+                const outputCells = outputRow.getElementsByClassName('permutation-cell');
+                
+                for (let i = 0; i < key.length; i++) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'permutation-arrow';
+                    
+                    const fromCell = isEncrypt ? inputCells[i] : inputCells[key[i] - 1];
+                    const toCell = isEncrypt ? outputCells[key[i] - 1] : outputCells[i];
+                    
+                    const fromRect = fromCell.getBoundingClientRect();
+                    const toRect = toCell.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    const startX = fromRect.left - containerRect.left + fromRect.width / 2;
+                    const startY = fromRect.bottom - containerRect.top;
+                    const endX = toRect.left - containerRect.left + toRect.width / 2;
+                    const endY = toRect.top - containerRect.top;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX);
+                    
+                    arrow.style.width = `${length}px`;
+                    arrow.style.transform = `rotate(${angle}rad)`;
+                    arrow.style.left = `${startX}px`;
+                    arrow.style.top = `${startY}px`;
+                    
+                    arrowRow.appendChild(arrow);
+                }
+            }, 0);
+        }
+
+        // Vigenere Autokey Implementation
+        function initVigenere() {
+            const table = document.getElementById('vigenereTable');
+            
+            // Add header row
+            const headerRow = document.createElement('div');
+            headerRow.className = 'vigenere-row';
+            headerRow.innerHTML = '<div class="vigenere-cell header"></div>';
+            for (let i = 0; i < 26; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'vigenere-cell header';
+                cell.textContent = String.fromCharCode(65 + i);
+                headerRow.appendChild(cell);
+            }
+            table.appendChild(headerRow);
+            
+            // Add data rows
+            for (let i = 0; i < 26; i++) {
+                const row = document.createElement('div');
+                row.className = 'vigenere-row';
+                
+                // Add row header
+                const header = document.createElement('div');
+                header.className = 'vigenere-cell header';
+                header.textContent = String.fromCharCode(65 + i);
+                row.appendChild(header);
+                
+                // Add shifted alphabet
+                for (let j = 0; j < 26; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'vigenere-cell';
+                    cell.textContent = String.fromCharCode(65 + ((i + j) % 26));
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+        }
+
+        function calculateAutokey() {
+            const text = document.getElementById('autoText').value.toUpperCase();
+            const initialKey = document.getElementById('autoKey').value.toUpperCase();
+
+            if (!text || !initialKey) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            // Generate full key
+            const fullKey = initialKey + text.slice(0, -initialKey.length);
+            
+            // Encrypt
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                if (text[i].match(/[A-Z]/)) {
+                    const shift = fullKey.charCodeAt(i) - 65;
+                    const code = ((text.charCodeAt(i) - 65 + shift) % 26) + 65;
+                    result += String.fromCharCode(code);
+                } else {
+                    result += text[i];
+                }
+            }
+
+            // Update key stream visualization
+            const keyStream = document.getElementById('keyStream');
+            keyStream.innerHTML = '';
+            fullKey.split('').forEach(char => {
+                const keyChar = document.createElement('div');
+                keyChar.className = 'key-char';
+                keyChar.textContent = char;
+                keyStream.appendChild(keyChar);
+            });
+
+            document.getElementById('autoResult').innerHTML = `
+                Văn bản gốc: ${text}<br>
+                Khóa ban đầu: ${initialKey}<br>
+                Khóa đầy đủ: ${fullKey}<br>
+                Kết quả: ${result}
+            `;
+
+            // Highlight cells in Vigenere table
+            const cells = document.querySelectorAll('.vigenere-cell');
+            cells.forEach(cell => cell.classList.remove('active'));
+            for (let i = 0; i < text.length; i++) {
+                if (text[i].match(/[A-Z]/)) {
+                    const row = fullKey.charCodeAt(i) - 65;
+                    const col = text.charCodeAt(i) - 65;
+                    const index = (row * 27) + col + 1;
+                    cells[index].classList.add('active');
+                }
+            }
+        }
+
+        // Monoalphabetic Cipher Implementation
+        function monoEncrypt() {
+            const text = document.getElementById('mono-text').value.toUpperCase();
+            const key = document.getElementById('mono-key').value.toUpperCase();
+            
+            try {
+                // Kiểm tra input
+                if (!/^[A-Z]+$/.test(text)) {
+                    throw new Error('Văn bản chỉ được chứa chữ cái');
+                }
+                if (!/^[A-Z]{26}$/.test(key)) {
+                    throw new Error('Khóa phải là 26 chữ cái in hoa');
+                }
+                
+                // Kiểm tra khóa có chứa mỗi chữ cái một lần
+                const keySet = new Set(key.split(''));
+                if (keySet.size !== 26) {
+                    throw new Error('Khóa phải chứa mỗi chữ cái một lần duy nhất');
+                }
+
+                let ciphertext = "";
+                for (let char of text) {
+                    if (char.match(/[A-Z]/)) {
+                        const index = char.charCodeAt(0) - 'A'.charCodeAt(0);
+                        ciphertext += key[index];
+                    } else {
+                        ciphertext += char;
+                    }
+                }
+
+                // Hiển thị kết quả
+                document.getElementById('mono-output').textContent = ciphertext;
+                document.getElementById('mono-result').style.display = 'block';
+
+                // Hiển thị các bước
+                const steps = `Các bước mã hóa chữ đơn:
+1. Bản rõ: ${text}
+2. Khóa: ${key}
+3. Ánh xạ:
+   ${Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i)).join('')}
+   ${key}
+4. Thay thế từng ký tự:
+   ${text.split('').map((c, i) => `${c} → ${ciphertext[i]}`).join('\n   ')}
+5. Bản mã: ${ciphertext}`;
+
+                document.getElementById('mono-steps').innerHTML = steps;
+
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        function monoDecrypt() {
+            const text = document.getElementById('mono-text').value.toUpperCase();
+            const key = document.getElementById('mono-key').value.toUpperCase();
+            
+            try {
+                // Kiểm tra input
+                if (!/^[A-Z]+$/.test(text)) {
+                    throw new Error('Văn bản chỉ được chứa chữ cái');
+                }
+                if (!/^[A-Z]{26}$/.test(key)) {
+                    throw new Error('Khóa phải là 26 chữ cái in hoa');
+                }
+
+                // Tạo bảng giải mã
+                const decryptMap = {};
+                for (let i = 0; i < 26; i++) {
+                    decryptMap[key[i]] = String.fromCharCode('A'.charCodeAt(0) + i);
+                }
+
+                let plaintext = "";
+                for (let char of text) {
+                    if (char.match(/[A-Z]/)) {
+                        plaintext += decryptMap[char];
+                    } else {
+                        plaintext += char;
+                    }
+                }
+
+                // Hiển thị kết quả
+                document.getElementById('mono-output').textContent = plaintext;
+                document.getElementById('mono-result').style.display = 'block';
+
+                // Hiển thị các bước
+                const steps = `Các bước giải mã chữ đơn:
+1. Bản mã: ${text}
+2. Khóa: ${key}
+3. Ánh xạ ngược:
+   ${key}
+   ${Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i)).join('')}
+4. Thay thế từng ký tự:
+   ${text.split('').map((c, i) => `${c} → ${plaintext[i]}`).join('\n   ')}
+5. Bản rõ: ${plaintext}`;
+
+                document.getElementById('mono-steps').innerHTML = steps;
+
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
+        }
+
+        // Playfair Cipher Implementation
+        function playfairEncrypt() {
+            const text = document.getElementById('playfair-text').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const key = document.getElementById('playfair-key').value.toUpperCase();
+            
+            if (!text || !key) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            // Chuẩn hóa văn bản
+            let normalizedText = '';
+            for (let i = 0; i < text.length; i++) {
+                if (i < text.length - 1 && text[i] === text[i + 1]) {
+                    normalizedText += text[i] + 'X';
+                } else {
+                    normalizedText += text[i];
+                }
+            }
+            if (normalizedText.length % 2 !== 0) {
+                normalizedText += 'X';
+            }
+
+            // Tạo ma trận Playfair
+            const playfairMatrix = createPlayfairMatrix(key);
+
+            // Mã hóa văn bản
+            let encryptedText = '';
+            for (let i = 0; i < normalizedText.length; i += 2) {
+                const a = normalizedText[i];
+                const b = normalizedText[i + 1];
+                const posA = findPosition(playfairMatrix, a);
+                const posB = findPosition(playfairMatrix, b);
+
+                if (posA.row === posB.row) {
+                    // Cùng hàng - lấy ký tự bên phải
+                    encryptedText += playfairMatrix[posA.row][(posA.col + 1) % 5];
+                    encryptedText += playfairMatrix[posB.row][(posB.col + 1) % 5];
+                } else if (posA.col === posB.col) {
+                    // Cùng cột - lấy ký tự bên dưới
+                    encryptedText += playfairMatrix[(posA.row + 1) % 5][posA.col];
+                    encryptedText += playfairMatrix[(posB.row + 1) % 5][posB.col];
+                } else {
+                    // Hình chữ nhật - lấy ký tự ở góc còn lại
+                    encryptedText += playfairMatrix[posA.row][posB.col];
+                    encryptedText += playfairMatrix[posB.row][posA.col];
+                }
+            }
+
+            // Hiển thị kết quả
+            document.getElementById('playfair-output').textContent = encryptedText;
+            document.getElementById('playfair-result').style.display = 'block';
+
+            // Hiển thị các bước
+            const steps = `Các bước mã hóa Playfair:
+1. Chuẩn hóa văn bản: ${normalizedText}
+2. Tạo ma trận Playfair:
+   ${formatMatrix(playfairMatrix)}
+3. Mã hóa từng cặp:
+   ${formatEncryptionSteps(normalizedText, encryptedText)}
+4. Bản mã: ${encryptedText}`;
+
+            document.getElementById('playfair-steps').innerHTML = steps;
+            
+            // Cập nhật visualization
+            updatePlayfairVisualization(playfairMatrix, normalizedText, encryptedText);
+        }
+
+        function playfairDecrypt() {
+            const text = document.getElementById('playfair-text').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const key = document.getElementById('playfair-key').value.toUpperCase();
+            
+            if (!text || !key) {
+                alert('Vui lòng nhập đầy đủ thông số');
+                return;
+            }
+
+            // Tạo ma trận Playfair
+            const playfairMatrix = createPlayfairMatrix(key);
+
+            // Giải mã văn bản
+            let decryptedText = '';
+            for (let i = 0; i < text.length; i += 2) {
+                const a = text[i];
+                const b = text[i + 1];
+                const posA = findPosition(playfairMatrix, a);
+                const posB = findPosition(playfairMatrix, b);
+
+                if (posA.row === posB.row) {
+                    // Cùng hàng - lấy ký tự bên trái
+                    decryptedText += playfairMatrix[posA.row][(posA.col + 4) % 5];
+                    decryptedText += playfairMatrix[posB.row][(posB.col + 4) % 5];
+                } else if (posA.col === posB.col) {
+                    // Cùng cột - lấy ký tự bên trên
+                    decryptedText += playfairMatrix[(posA.row + 4) % 5][posA.col];
+                    decryptedText += playfairMatrix[(posB.row + 4) % 5][posB.col];
+                } else {
+                    // Hình chữ nhật - lấy ký tự ở góc còn lại
+                    decryptedText += playfairMatrix[posA.row][posB.col];
+                    decryptedText += playfairMatrix[posB.row][posA.col];
+                }
+            }
+
+            // Hiển thị kết quả
+            document.getElementById('playfair-output').textContent = decryptedText;
+            document.getElementById('playfair-result').style.display = 'block';
+
+            // Hiển thị các bước
+            const steps = `Các bước giải mã Playfair:
+1. Bản mã: ${text}
+2. Tạo ma trận Playfair:
+   ${formatMatrix(playfairMatrix)}
+3. Giải mã từng cặp:
+   ${formatDecryptionSteps(text, decryptedText)}
+4. Bản rõ: ${decryptedText}`;
+
+            document.getElementById('playfair-steps').innerHTML = steps;
+            
+            // Cập nhật visualization
+            updatePlayfairVisualization(playfairMatrix, text, decryptedText, false);
+        }
+
+        function createPlayfairMatrix(key) {
+            // Tạo ma trận 5x5
+            const matrix = Array(5).fill().map(() => Array(5).fill(''));
+            const used = new Set();
+            let row = 0, col = 0;
+
+            // Thêm các ký tự từ khóa (bỏ J)
+            for (let char of key.replace(/J/g, 'I')) {
+                if (!used.has(char)) {
+                    matrix[row][col] = char;
+                    used.add(char);
+                    col++;
+                    if (col === 5) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            }
+
+            // Thêm các ký tự còn lại
+            for (let i = 65; i <= 90; i++) {
+                const char = String.fromCharCode(i);
+                if (char !== 'J' && !used.has(char)) {
+                    matrix[row][col] = char;
+                    col++;
+                    if (col === 5) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            }
+
+            return matrix;
+        }
+
+        function findPosition(matrix, char) {
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (matrix[i][j] === char) {
+                        return { row: i, col: j };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function formatMatrix(matrix) {
+            return matrix.map(row => row.join(' ')).join('\n   ');
+        }
+
+        function formatEncryptionSteps(input, output) {
+            let steps = '';
+            for (let i = 0; i < input.length; i += 2) {
+                steps += `${input[i]}${input[i+1]} → ${output[i]}${output[i+1]}\n   `;
+            }
+            return steps;
+        }
+
+        function formatDecryptionSteps(input, output) {
+            let steps = '';
+            for (let i = 0; i < input.length; i += 2) {
+                steps += `${input[i]}${input[i+1]} → ${output[i]}${output[i+1]}\n   `;
+            }
+            return steps;
+        }
+
+        function updatePlayfairVisualization(matrix, input, output, isEncrypt = true) {
+            // Cập nhật grid
+            const grid = document.getElementById('playfairGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'playfair-cell';
+                    cell.textContent = matrix[i][j];
+                    grid.appendChild(cell);
+                }
+            }
+
+            // Cập nhật các cặp
+            const pairs = document.getElementById('playfairPairs');
+            pairs.innerHTML = '';
+            
+            for (let i = 0; i < input.length; i += 2) {
+                const pair = document.createElement('div');
+                pair.className = 'playfair-pair';
+                pair.innerHTML = `
+                    <div class="pair-text">${input[i]}${input[i+1]}</div>
+                    <div class="pair-arrow">↓</div>
+                    <div class="pair-text">${output[i]}${output[i+1]}</div>
+                `;
+                pairs.appendChild(pair);
+            }
+        }
+
+        // Initialize all visualizations
+        document.addEventListener('DOMContentLoaded', function() {
+            initModulo();
+            initPermutation();
+            initVigenere();
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
